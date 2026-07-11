@@ -1,31 +1,20 @@
-# Byte-compiled / optimized / DLL files
+# Python cache
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
 
-# Database files (local Sqlite)
-*.sqlite3
-*.sqlite3-journal
-
-# Environment configuration
-.env
-
-# Virtual environment folders
+# Environments
 .venv/
 venv/
-env/
 ENV/
-
-# System specific
-.DS_Store
-Thumbs.db
-desktop.ini
+env/
 
 # IDE files
 .vscode/
 .idea/
 
-# Application generated files
-backend/django-api/media/*
-!backend/django-api/media/.gitkeep
-backend/django-api/staticfiles/
+# Local/testing data
+conversation_history.json
+*.log
