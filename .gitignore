@@ -18,3 +18,7 @@ env/
 # Local/testing data
 conversation_history.json
 *.log
+
+
+# Databases (if local)
+*.sqlite3
