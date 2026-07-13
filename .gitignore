@@ -15,6 +15,9 @@ env/
 .vscode/
 .idea/
 
+.env
+.env.local
+
 # Local/testing data
 conversation_history.json
 *.log
