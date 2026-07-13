@@ -21,6 +21,7 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.s
 
 # Application definition
 INSTALLED_APPS = [
+    "apps.common.apps.CommonConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -33,7 +34,6 @@ INSTALLED_APPS = [
     "corsheaders",
     
     # Namespaced Apps
-    "apps.common.apps.CommonConfig",
     "apps.users.apps.UsersConfig",
     "apps.authentication.apps.AuthenticationConfig",
     "apps.cases.apps.CasesConfig",
