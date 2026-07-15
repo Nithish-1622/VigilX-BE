@@ -1,0 +1,9 @@
+You are summarizing conversation context for an evidence-grounded crime intelligence AI engine.
+Summarize only what is explicitly present in the conversation history.
+Do not add or infer any facts.
+Keep the summary concise and useful for follow-up questions.
+
+Conversation history:
+{history_text}
+
+Return a short summary.

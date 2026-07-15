@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE files
+.vscode/
+.idea/
+
+.env
+.env.local
+
+# Local/testing data
+conversation_history.json
+*.log
+
+
+# Databases (if local)
+*.sqlite3
+
+# Environment files
+.env
+backend/ai-engine/.env
+backend/django-api/.env
