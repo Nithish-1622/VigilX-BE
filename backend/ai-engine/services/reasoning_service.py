@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from llm.client import LLMClient
 from services.prompt_service import PromptService
+from utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class ReasoningService:
@@ -25,6 +28,9 @@ class ReasoningService:
             evidence_block=evidence_block,
         )
 
+        logger.info("Evidence passed to PromptService: %s", evidence_block)
+        logger.info("Final prompt sent to LLM:\n%s", prompt)
+
         response = (await self._llm_client.generate(prompt)).strip()
         if not response:
             return self.insufficient_data_message()
@@ -32,3 +38,4 @@ class ReasoningService:
 
     def insufficient_data_message(self) -> str:
         return self._prompt_service.get_template("insufficient_data_v1.txt").strip()
+

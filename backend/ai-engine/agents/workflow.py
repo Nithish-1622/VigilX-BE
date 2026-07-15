@@ -4,6 +4,10 @@ from pathlib import Path
 from typing import Any, TypedDict
 from uuid import uuid4
 
+from utils.logging import get_logger
+
+logger = get_logger(__name__)
+
 from llm.client import LLMClient
 from rag.retriever import RAGRetriever
 from schemas.case_summary import CaseSummary
@@ -204,6 +208,9 @@ class AIOrchestrator:
 
         intent = await self._intent.detect(question, history)
         structured_query = self._planner.make_plan(intent, question)
+        
+        logger.info("Resolved Entity - Question: '%s', History size: %d", question, len(history))
+        
         state["intent"] = intent
         state["structured_query"] = structured_query
         state["query_plan"] = structured_query.model_dump_json()
@@ -243,6 +250,9 @@ class AIOrchestrator:
 
         merged_evidence = "\n".join(part for part in [rag_text, sql_text] if part)
         merged_citations = [*rag_citations, *sql_citations]
+
+        logger.info("Retrieved REST payload: %s", sql_records)
+        logger.info("Parsed evidence: %s", merged_evidence)
 
         state["sql_records"] = sql_records
         state["sql_citations"] = sql_citations
