@@ -31,11 +31,20 @@ class EvidenceService:
         if not isinstance(row, dict):
             return str(row)
 
-        keys = ["id", "case_id", "fir_id", "accused_id", "victim_id", "name", "status", "summary", "description", "timestamp", "source", "snippet"]
         parts = []
-        for key in keys:
-            if key in row and row[key] is not None:
-                parts.append(f"{key}={row[key]}")
+        for key, value in row.items():
+            if value is None:
+                continue
+            if isinstance(value, list) and value:
+                nested = []
+                for item in value:
+                    if isinstance(item, dict):
+                        nested.append("{" + ", ".join(f"{k}={v}" for k, v in item.items() if v is not None) + "}")
+                    else:
+                        nested.append(str(item))
+                parts.append(f"{key}=[" + " | ".join(nested) + "]")
+            elif str(value).strip():
+                parts.append(f"{key}={value}")
         if parts:
             return "; ".join(parts)
         return str(row)

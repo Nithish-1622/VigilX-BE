@@ -39,13 +39,15 @@ class RestGatewayTests(unittest.TestCase):
         self.assertEqual(items[0]["name"], "A")
 
     def test_gateway_returns_not_configured_when_base_url_missing(self) -> None:
-        gateway = DjangoRestGateway()
-        query = StructuredQuery(capability=RestCapability.CASE_SEARCH, intent="case_lookup", question="q")
-
-        response = gateway.invoke(query)
-
-        self.assertFalse(response.success)
-        self.assertIn("endpoint_not_configured", response.error or "")
+        from unittest.mock import patch
+        with patch.object(RestEndpointRegistry, "get", return_value=None):
+            gateway = DjangoRestGateway()
+            query = StructuredQuery(capability=RestCapability.CASE_SEARCH, intent="case_lookup", question="q")
+        
+            response = gateway.invoke(query)
+        
+            self.assertFalse(response.success)
+            self.assertIn("endpoint_not_configured", response.error or "")
 
 
 if __name__ == "__main__":

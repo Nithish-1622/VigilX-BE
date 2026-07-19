@@ -25,3 +25,8 @@ conversation_history.json
 
 # Databases (if local)
 *.sqlite3
+
+# Environment files
+.env
+backend/ai-engine/.env
+backend/django-api/.env
