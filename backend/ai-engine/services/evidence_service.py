@@ -33,7 +33,17 @@ class EvidenceService:
 
         parts = []
         for key, value in row.items():
-            if value is not None and str(value).strip():
+            if value is None:
+                continue
+            if isinstance(value, list) and value:
+                nested = []
+                for item in value:
+                    if isinstance(item, dict):
+                        nested.append("{" + ", ".join(f"{k}={v}" for k, v in item.items() if v is not None) + "}")
+                    else:
+                        nested.append(str(item))
+                parts.append(f"{key}=[" + " | ".join(nested) + "]")
+            elif str(value).strip():
                 parts.append(f"{key}={value}")
         if parts:
             return "; ".join(parts)

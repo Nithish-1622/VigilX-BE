@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+load_dotenv(Path(__file__).resolve().parent.parent.parent.parent / ".env")
 
 
 @dataclass(frozen=True)

@@ -17,11 +17,8 @@ class FIRViewSet(viewsets.ModelViewSet):
     Supports robust search (on FIR number and description) and filters.
     """
     permission_classes = [IsAuthenticated, IsCaseWriteAuthorized]
-
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return FIRDetailSerializer
-        return FIRSerializer
+        return FIRDetailSerializer
 
     def get_queryset(self):
         queryset = FIR.objects.all().order_by('-reported_date_time')
@@ -54,10 +51,19 @@ class FIRViewSet(viewsets.ModelViewSet):
             except ValueError:
                 queryset = queryset.filter(fir_number=fir_id_val)
         if search_query:
-            queryset = queryset.filter(
-                Q(fir_number__icontains=search_query) | 
-                Q(description__icontains=search_query)
-            )
+            q_objects = Q()
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= (
+                        Q(fir_number__icontains=word) | 
+                        Q(description__icontains=word) |
+                        Q(accused__name__icontains=word) |
+                        Q(victims__name__icontains=word) |
+                        Q(complainants__name__icontains=word)
+                    )
+            if q_objects:
+                queryset = queryset.filter(q_objects).distinct()
             
         return queryset
 
@@ -95,10 +101,14 @@ class VictimViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Victim.objects.all().order_by('-created_at')
+
         name_val = self.request.query_params.get('name')
         fir_val = self.request.query_params.get('fir')
+        search_query = self.request.query_params.get('search')
+
         if name_val:
             queryset = queryset.filter(name__icontains=name_val)
+
         if fir_val:
             import uuid
             try:
@@ -106,8 +116,24 @@ class VictimViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(fir_id=fir_val)
             except ValueError:
                 queryset = queryset.filter(fir__fir_number=fir_val)
-        return queryset
 
+        if search_query:
+            q_objects = Q()
+            stop_words = {
+                'give', 'details', 'about', 'what', 'who', 'show',
+                'tell', 'find', 'search', 'suspect', 'accused',
+                'victim', 'case', 'fir', 'number', 'the',
+                'and', 'for', 'with', 'from', 'this', 'that'
+            }
+
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= Q(name__icontains=word)
+
+            if q_objects:
+                queryset = queryset.filter(q_objects)
+
+        return queryset
 
 class AccusedViewSet(viewsets.ModelViewSet):
     """
@@ -120,10 +146,14 @@ class AccusedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Accused.objects.all().order_by('-created_at')
+
         name_val = self.request.query_params.get('name')
         fir_val = self.request.query_params.get('fir')
+        search_query = self.request.query_params.get('search')
+
         if name_val:
             queryset = queryset.filter(name__icontains=name_val)
+
         if fir_val:
             import uuid
             try:
@@ -131,16 +161,31 @@ class AccusedViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(fir_id=fir_val)
             except ValueError:
                 queryset = queryset.filter(fir__fir_number=fir_val)
+
+        if search_query:
+            q_objects = Q()
+            stop_words = {
+                'give', 'details', 'about', 'what', 'who', 'show',
+                'tell', 'find', 'search', 'suspect', 'accused',
+                'victim', 'case', 'fir', 'number', 'the',
+                'and', 'for', 'with', 'from', 'this', 'that'
+            }
+
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= Q(name__icontains=word)
+
+            if q_objects:
+                queryset = queryset.filter(q_objects)
+
         return queryset
-
-
 class ClueEntityViewSet(viewsets.ModelViewSet):
     """
     ViewSet to manage case entities (phone numbers, vehicles, bank accounts).
     Write access is restricted to Investigators and Supervisors.
     Supports a custom matching interface for search endpoints.
     """
-    queryset = ClueEntity.objects.all().order_by('-created_at')
+    queryset = ClueEntity.objects.all().order_by('-id')
     serializer_class = ClueEntitySerializer
     permission_classes = [IsAuthenticated, IsCaseWriteAuthorized]
 

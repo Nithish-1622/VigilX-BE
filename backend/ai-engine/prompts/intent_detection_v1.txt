@@ -9,5 +9,7 @@ Classify the user question into one of:
 - follow_up
 - unknown
 
+CRITICAL RULE: If the user asks for details about a specific person (e.g., "Anjali Sharma", "Rajesh Kumar"), you MUST classify it as 'case_lookup' UNLESS the question explicitly contains the word "suspect" or "victim".
+
 Return ONLY the label.
 Question: {question}
