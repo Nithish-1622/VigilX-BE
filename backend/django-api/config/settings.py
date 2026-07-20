@@ -93,8 +93,14 @@ if DB_NAME and DB_USER and DB_PASSWORD:
             "PASSWORD": DB_PASSWORD,
             "HOST": DB_HOST,
             "PORT": DB_PORT,
+            "OPTIONS": {
+                "sslmode": "require",
+            }
         }
     }
+    db_endpoint = os.getenv("DB_ENDPOINT")
+    if db_endpoint:
+        DATABASES["default"]["OPTIONS"]["options"] = f"endpoint={db_endpoint}"
 else:
     DATABASES = {
         "default": {

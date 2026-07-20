@@ -79,7 +79,7 @@ class AIOrchestrator:
         self._intent = IntentService(prompt_service=prompt_service, llm_client=llm_client)
         self._rest_gateway = DjangoRestGateway()
         self._retriever = RAGRetriever(rest_gateway=self._rest_gateway)
-        self._planner = SQLAgentPlanner()
+        self._planner = SQLAgentPlanner(llm_client=llm_client)
         self._sql_agent = SQLAgentService(rest_gateway=self._rest_gateway)
         self._evidence = EvidenceService()
         self._reasoning = ReasoningService(
@@ -207,7 +207,7 @@ class AIOrchestrator:
         history = self._conversation.get_history(user_id, session_id)
 
         intent = await self._intent.detect(question, history)
-        structured_query = self._planner.make_plan(intent, question)
+        structured_query = await self._planner.make_plan(intent, question)
         
         logger.info("Resolved Entity - Question: '%s', History size: %d", question, len(history))
         
@@ -232,6 +232,9 @@ class AIOrchestrator:
         return state
 
     async def _node_sql(self, state: WorkflowState) -> WorkflowState:
+        import re
+        from schemas.rest import RestCapability
+        
         structured_query = state.get("structured_query")
         auth_header = state.get("auth_header")
         context_headers = state.get("context_headers", {})
@@ -248,8 +251,57 @@ class AIOrchestrator:
         rag_text = state.get("rag_evidence_text", "")
         sql_text = self._evidence.records_to_text(sql_records)
 
-        merged_evidence = "\n".join(part for part in [rag_text, sql_text] if part)
-        merged_citations = [*rag_citations, *sql_citations]
+        # Dynamic Case Mapping: If accused/victim records are retrieved but no case record,
+        # fetch the matching case details dynamically from /api/cases/ to provide the context linking
+        # the case UUID to the case number (e.g. mapping 0000...0065 to FIR-2026-101).
+        extra_citations = []
+        extra_texts = []
+        
+        fir_ids = set()
+        for record in sql_records:
+            fir_id = record.get("fir")
+            if fir_id:
+                fir_ids.add(fir_id)
+                
+        for c in rag_citations:
+            fir_match = re.search(r'\bfir=([a-f0-9-]{36})\b', c.snippet, re.IGNORECASE)
+            if fir_match:
+                fir_ids.add(fir_match.group(1))
+
+        if fir_ids:
+            for f_id in fir_ids:
+                case_query = StructuredQuery(
+                    capability=RestCapability.CASE_SEARCH,
+                    intent="case_lookup",
+                    question=state["question"],
+                    query_text=state["question"],
+                    filters={"fir_id": f_id}
+                )
+                try:
+                    case_res = self._rest_gateway.invoke(
+                        case_query,
+                        auth_header=auth_header,
+                        context_headers=context_headers
+                    )
+                    if case_res.success:
+                        case_items = case_res.payload.get("items", [])
+                        if isinstance(case_items, list):
+                            for item in case_items:
+                                extra_texts.append(self._evidence.format_row(item))
+                                extra_citations.append(
+                                    Citation(
+                                        source="case_lookup",
+                                        reference_id=item.get("id"),
+                                        snippet=self._evidence.format_row(item),
+                                        score=None
+                                    )
+                                )
+                except Exception as ex:
+                    logger.warning("Failed to fetch dynamic case mapping for %s: %s", f_id, ex)
+
+        extra_text_block = "\n".join(extra_texts)
+        merged_evidence = "\n".join(part for part in [rag_text, sql_text, extra_text_block] if part)
+        merged_citations = [*rag_citations, *sql_citations, *extra_citations]
 
         logger.info("Retrieved REST payload: %s", sql_records)
         logger.info("Parsed evidence: %s", merged_evidence)
