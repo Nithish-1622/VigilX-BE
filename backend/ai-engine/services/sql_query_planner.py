@@ -30,8 +30,8 @@ class SQLAgentPlanner:
         name_match = re.search(r'\b(?:is|show|suspect|victim|for)\b\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)', question)
         if name_match:
             name_val = name_match.group(1).strip()
-            # Avoid matching case or FIR words as name
-            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "burglary", "timeline", "detail"]):
+            # Avoid matching case, role or FIR words as name
+            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "burglary", "timeline", "detail", "suspect", "victim", "accused", "person"]):
                 filters["name"] = name_val
 
         # Look for crime type patterns
@@ -43,7 +43,7 @@ class SQLAgentPlanner:
         prompt = f"""
         Extract query filters from the user question for our REST API.
         Allowed filter fields:
-        - "name": Person's name (suspect, accused, victim). E.g., "Rajesh Kumar", "Priya".
+        - "name": Actual person's proper name (e.g. "Rajesh Kumar", "Priya"). Do NOT extract generic role words like "suspect", "accused", or "victim" as names.
         - "fir_id": Case reference or FIR number. E.g., "FIR-2026-101", "FIR-123".
         - "crime_type": Type of crime (must be uppercase, e.g. "ROBBERY", "THEFT", "BURGLARY").
         - "fir": FIR reference.
@@ -65,6 +65,10 @@ class SQLAgentPlanner:
                             filters[k] = str(v).strip()
         except Exception:
             pass
+
+        # Sanitize name filter to ensure no role words slipped through
+        if "name" in filters and filters["name"].lower().strip() in {"suspect", "victim", "accused", "person", "complainant", "officer", "the suspect", "the victim"}:
+            del filters["name"]
 
         return StructuredQuery(
             capability=capability,
