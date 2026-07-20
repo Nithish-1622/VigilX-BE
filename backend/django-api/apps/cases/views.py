@@ -44,12 +44,16 @@ class FIRViewSet(viewsets.ModelViewSet):
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
         if fir_id_val:
-            import uuid
-            try:
-                uuid.UUID(fir_id_val)
-                queryset = queryset.filter(Q(fir_number=fir_id_val) | Q(id=fir_id_val))
-            except ValueError:
-                queryset = queryset.filter(fir_number=fir_id_val)
+            import re
+            digit_groups = re.findall(r'\d+', fir_id_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(id=int(fir_id_val))
+                except ValueError:
+                    pass
         if search_query:
             q_objects = Q()
             stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
@@ -100,22 +104,26 @@ class VictimViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
 
     def get_queryset(self):
-        queryset = Victim.objects.all().order_by('-created_at')
+        queryset = Victim.objects.all().order_by('-id')
 
         name_val = self.request.query_params.get('name')
-        fir_val = self.request.query_params.get('fir')
+        fir_val = self.request.query_params.get('fir') or self.request.query_params.get('fir_id')
         search_query = self.request.query_params.get('search')
 
         if name_val:
             queryset = queryset.filter(name__icontains=name_val)
 
         if fir_val:
-            import uuid
-            try:
-                uuid.UUID(fir_val)
-                queryset = queryset.filter(fir_id=fir_val)
-            except ValueError:
-                queryset = queryset.filter(fir__fir_number=fir_val)
+            import re
+            digit_groups = re.findall(r'\d+', fir_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(fir_id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(fir_id=int(fir_val))
+                except ValueError:
+                    pass
 
         if search_query:
             q_objects = Q()
@@ -127,8 +135,9 @@ class VictimViewSet(viewsets.ModelViewSet):
             }
 
             for word in search_query.split():
-                if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= Q(name__icontains=word)
+                clean_word = re.sub(r'[^\w]', '', word)
+                if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
+                    q_objects &= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)
@@ -145,22 +154,26 @@ class AccusedViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
 
     def get_queryset(self):
-        queryset = Accused.objects.all().order_by('-created_at')
+        queryset = Accused.objects.all().order_by('-id')
 
         name_val = self.request.query_params.get('name')
-        fir_val = self.request.query_params.get('fir')
+        fir_val = self.request.query_params.get('fir') or self.request.query_params.get('fir_id')
         search_query = self.request.query_params.get('search')
 
         if name_val:
             queryset = queryset.filter(name__icontains=name_val)
 
         if fir_val:
-            import uuid
-            try:
-                uuid.UUID(fir_val)
-                queryset = queryset.filter(fir_id=fir_val)
-            except ValueError:
-                queryset = queryset.filter(fir__fir_number=fir_val)
+            import re
+            digit_groups = re.findall(r'\d+', fir_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(fir_id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(fir_id=int(fir_val))
+                except ValueError:
+                    pass
 
         if search_query:
             q_objects = Q()
@@ -172,8 +185,9 @@ class AccusedViewSet(viewsets.ModelViewSet):
             }
 
             for word in search_query.split():
-                if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= Q(name__icontains=word)
+                clean_word = re.sub(r'[^\w]', '', word)
+                if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
+                    q_objects &= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)
@@ -221,4 +235,4 @@ class ClueEntityViewSet(viewsets.ModelViewSet):
             
         return super().list(request, *args, **kwargs)
 
-# Refreshed import path structures and hosts
+# Refreshed import path structures and hosts v3

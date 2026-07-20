@@ -30,3 +30,7 @@ conversation_history.json
 .env
 backend/ai-engine/.env
 backend/django-api/.env
+
+# Integration Guides
+frontend_integration_guide.md
+FRONTEND_ARCHITECTURE.md
