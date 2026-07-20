@@ -19,9 +19,7 @@ class FIRViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsCaseWriteAuthorized]
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return FIRDetailSerializer
-        return FIRSerializer
+        return FIRDetailSerializer
 
     def get_queryset(self):
         queryset = FIR.objects.all().order_by('-reported_date_time')
@@ -46,10 +44,19 @@ class FIRViewSet(viewsets.ModelViewSet):
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
         if search_query:
-            queryset = queryset.filter(
-                Q(fir_number__icontains=search_query) | 
-                Q(description__icontains=search_query)
-            )
+            q_objects = Q()
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= (
+                        Q(fir_number__icontains=word) | 
+                        Q(description__icontains=word) |
+                        Q(accused__name__icontains=word) |
+                        Q(victims__name__icontains=word) |
+                        Q(complainants__name__icontains=word)
+                    )
+            if q_objects:
+                queryset = queryset.filter(q_objects).distinct()
             
         return queryset
 
@@ -82,10 +89,22 @@ class VictimViewSet(viewsets.ModelViewSet):
     Access is completely blocked for Policymakers.
     Write access is restricted to Investigators and Supervisors.
     """
-    queryset = Victim.objects.all().order_by('-created_at')
     serializer_class = VictimSerializer
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
 
+    def get_queryset(self):
+        queryset = Victim.objects.all().order_by('-id')
+        search_query = self.request.query_params.get('search')
+        if search_query:
+            from django.db.models import Q
+            q_objects = Q()
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= Q(name__icontains=word)
+            if q_objects:
+                queryset = queryset.filter(q_objects)
+        return queryset
 
 class AccusedViewSet(viewsets.ModelViewSet):
     """
@@ -93,10 +112,22 @@ class AccusedViewSet(viewsets.ModelViewSet):
     Access is completely blocked for Policymakers.
     Write access is restricted to Investigators and Supervisors.
     """
-    queryset = Accused.objects.all().order_by('-created_at')
     serializer_class = AccusedSerializer
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
 
+    def get_queryset(self):
+        queryset = Accused.objects.all().order_by('-id')
+        search_query = self.request.query_params.get('search')
+        if search_query:
+            from django.db.models import Q
+            q_objects = Q()
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            for word in search_query.split():
+                if len(word) > 2 and word.lower() not in stop_words:
+                    q_objects &= Q(name__icontains=word)
+            if q_objects:
+                queryset = queryset.filter(q_objects)
+        return queryset
 
 class ClueEntityViewSet(viewsets.ModelViewSet):
     """
@@ -104,7 +135,7 @@ class ClueEntityViewSet(viewsets.ModelViewSet):
     Write access is restricted to Investigators and Supervisors.
     Supports a custom matching interface for search endpoints.
     """
-    queryset = ClueEntity.objects.all().order_by('-created_at')
+    queryset = ClueEntity.objects.all().order_by('-id')
     serializer_class = ClueEntitySerializer
     permission_classes = [IsAuthenticated, IsCaseWriteAuthorized]
 

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR.parent.parent / '.env')
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"

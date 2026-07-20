@@ -38,13 +38,49 @@ def seed_postgres():
     # Note: We aren't using ON CONFLICT DO NOTHING because it requires a unique constraint on ID in Postgres, 
     # but the schema already defines PRIMARY KEYs so we just catch the IntegrityError if it already exists.
     try:
-        cur.execute("INSERT INTO CaseMaster (CaseMasterID, CaseNo, BriefFacts) VALUES (101, 'FIR-2026-101', 'Bank robbery at downtown branch by three masked suspects.')")
-        cur.execute("INSERT INTO ComplainantDetails (ComplainantID, CaseMasterID, ComplainantName, AgeYear) VALUES (201, 101, 'Jane Smith', 45)")
-        cur.execute("INSERT INTO Accused (AccusedMasterID, CaseMasterID, AccusedName, AgeYear) VALUES (301, 101, 'John The Shadow Doe', 42)")
+        cur.execute("""
+            INSERT INTO CaseMaster (CaseMasterID, CaseNo, BriefFacts) 
+            VALUES (101, 'FIR-2026-101', 'Bank robbery at Connaught Place branch by three masked suspects.')
+            ON CONFLICT (CaseMasterID) DO UPDATE 
+            SET CaseNo = EXCLUDED.CaseNo, BriefFacts = EXCLUDED.BriefFacts
+        """)
+        cur.execute("""
+            INSERT INTO ComplainantDetails (ComplainantID, CaseMasterID, ComplainantName, AgeYear) 
+            VALUES (201, 101, 'Anjali Sharma', 45)
+            ON CONFLICT (ComplainantID) DO UPDATE 
+            SET CaseMasterID = EXCLUDED.CaseMasterID, ComplainantName = EXCLUDED.ComplainantName, AgeYear = EXCLUDED.AgeYear
+        """)
+        cur.execute("""
+            INSERT INTO Accused (AccusedMasterID, CaseMasterID, AccusedName, AgeYear) 
+            VALUES (301, 101, 'Rajesh Kumar', 42)
+            ON CONFLICT (AccusedMasterID) DO UPDATE 
+            SET CaseMasterID = EXCLUDED.CaseMasterID, AccusedName = EXCLUDED.AccusedName, AgeYear = EXCLUDED.AgeYear
+        """)
+        
+        # Add another mock case (102)
+        cur.execute("""
+            INSERT INTO CaseMaster (CaseMasterID, CaseNo, BriefFacts) 
+            VALUES (102, 'FIR-2026-102', 'Cyber fraud involving fake UPI transaction links sent via WhatsApp.')
+            ON CONFLICT (CaseMasterID) DO UPDATE 
+            SET CaseNo = EXCLUDED.CaseNo, BriefFacts = EXCLUDED.BriefFacts
+        """)
+        cur.execute("""
+            INSERT INTO ComplainantDetails (ComplainantID, CaseMasterID, ComplainantName, AgeYear) 
+            VALUES (202, 102, 'Vikram Singh', 35)
+            ON CONFLICT (ComplainantID) DO UPDATE 
+            SET CaseMasterID = EXCLUDED.CaseMasterID, ComplainantName = EXCLUDED.ComplainantName, AgeYear = EXCLUDED.AgeYear
+        """)
+        cur.execute("""
+            INSERT INTO Accused (AccusedMasterID, CaseMasterID, AccusedName, AgeYear) 
+            VALUES (302, 102, 'Priya Das', 28)
+            ON CONFLICT (AccusedMasterID) DO UPDATE 
+            SET CaseMasterID = EXCLUDED.CaseMasterID, AccusedName = EXCLUDED.AccusedName, AgeYear = EXCLUDED.AgeYear
+        """)
+        
         conn.commit()
         print("PostgreSQL seeded successfully!")
-    except psycopg2.IntegrityError:
-        print("Data already exists in Postgres. Skipping insert.")
+    except Exception as e:
+        print(f"Error seeding Postgres data: {e}")
         conn.rollback()
         
     cur.close()
@@ -67,13 +103,25 @@ def seed_neo4j():
     SET c.case_number = 'FIR-2026-101', c.status = 'OPEN'
     
     MERGE (comp:Person {id: 'COMP_201'})
-    SET comp.name = 'Jane Smith', comp.age_group = '45'
+    SET comp.name = 'Anjali Sharma', comp.age_group = '45'
     
     MERGE (acc:Person {id: 'ACC_301'})
-    SET acc.name = 'John The Shadow Doe', acc.age_group = '42'
+    SET acc.name = 'Rajesh Kumar', acc.age_group = '42'
     
     MERGE (comp)-[:FILED_BY]->(c)
     MERGE (acc)-[:ACCUSED_IN]->(c)
+    
+    MERGE (c2:Case {id: 'CASE_102'})
+    SET c2.case_number = 'FIR-2026-102', c2.status = 'OPEN'
+    
+    MERGE (comp2:Person {id: 'COMP_202'})
+    SET comp2.name = 'Vikram Singh', comp2.age_group = '35'
+    
+    MERGE (acc2:Person {id: 'ACC_302'})
+    SET acc2.name = 'Priya Das', acc2.age_group = '28'
+    
+    MERGE (comp2)-[:FILED_BY]->(c2)
+    MERGE (acc2)-[:ACCUSED_IN]->(c2)
     """
     driver.execute_query(cypher)
     print("Neo4j Graph nodes and relationships created successfully!")
@@ -93,28 +141,34 @@ def seed_qdrant():
     # Ensure collection exists
     try:
         client.create_collection(
-            collection_name="cases",
+            collection_name="crime_cases",
             vectors_config=VectorParams(size=384, distance=Distance.COSINE)
         )
-        print("Created 'cases' collection.")
+        print("Created 'crime_cases' collection.")
     except Exception as e:
-        print("'cases' collection already exists.")
+        print("'crime_cases' collection already exists.")
         
     print("Generating embeddings locally using fastembed...")
     # Fastembed generates 384 dim vectors by default for BGE-small
     embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
     
-    text = "Bank robbery at downtown branch by three masked suspects."
-    vector = list(embedding_model.embed([text]))[0].tolist()
+    text1 = "Bank robbery at Connaught Place branch by three masked suspects."
+    text2 = "Cyber fraud involving fake UPI transaction links sent via WhatsApp."
+    vectors = list(embedding_model.embed([text1, text2]))
     
-    print("Uploading vector to Qdrant...")
+    print("Uploading vectors to Qdrant...")
     client.upsert(
-        collection_name="cases",
+        collection_name="crime_cases",
         points=[
             PointStruct(
                 id=101,
-                vector=vector,
-                payload={"case_id": "CASE_101", "brief_facts": text}
+                vector=vectors[0].tolist(),
+                payload={"case_id": "CASE_101", "brief_facts": text1}
+            ),
+            PointStruct(
+                id=102,
+                vector=vectors[1].tolist(),
+                payload={"case_id": "CASE_102", "brief_facts": text2}
             )
         ]
     )

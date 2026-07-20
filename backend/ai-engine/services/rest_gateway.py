@@ -5,6 +5,7 @@ from services.rest_client import RestClient
 from services.rest_endpoint_registry import RestEndpointRegistry
 from services.rest_request_builder import RestRequestBuilder
 from services.rest_response_parser import RestResponseParser
+from utils.config import settings
 
 
 class DjangoRestGateway:
@@ -28,11 +29,19 @@ class DjangoRestGateway:
                 error=f"endpoint_not_configured:{query.capability.value}",
             )
 
+        # Always use the service token for internal API communication
+        token = settings.downstream_service_token
+        headers = context_headers.copy() if context_headers else {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        elif auth_header:
+            headers["Authorization"] = auth_header
+
         invocation = self._builder.build(
             definition,
             query,
-            auth_header=auth_header,
-            context_headers=context_headers,
+            auth_header=headers.get("Authorization"),
+            context_headers=headers,
         )
         if invocation is None:
             return RestInvocationResponse(
