@@ -25,8 +25,29 @@ app = FastAPI(
 	lifespan=lifespan,
 )
 
-app.include_router(ask_router)
+from routers.ask import router as ask_router
+from routers.voice import router as voice_router
+from routers.history import router as history_router
+from routers.documents import router as documents_router
+from routers.graph import router as graph_router
+from routers.profiling import router as profiling_router
 
+app.include_router(ask_router)
+app.include_router(voice_router)
+app.include_router(history_router)
+app.include_router(documents_router)
+app.include_router(graph_router)
+app.include_router(profiling_router)
+
+
+@app.get("/")
+async def root() -> dict[str, str]:
+    return {
+        "status": "success",
+        "message": "Welcome to VigilX AI Engine API",
+        "version": settings.app_version,
+        "docs": "/docs"
+    }
 
 @app.get("/health")
 async def health() -> dict[str, str]:

@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Any
 
-from neo4j.connection import graph_manager
-from neo4j.exceptions import GraphQueryError
+from db_neo4j.connection import graph_manager
+from db_neo4j.exceptions import GraphQueryError
 from analytics.network import NetworkAnalyzer
 from analytics.exceptions import QueryExecutionError
 from .exceptions import ProfilingError, EntityNotFoundError

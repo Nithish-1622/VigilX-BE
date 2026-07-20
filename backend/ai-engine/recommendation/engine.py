@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, Any, List
 
-from neo4j.connection import graph_manager
-from neo4j.exceptions import GraphQueryError
+from db_neo4j.connection import graph_manager
+from db_neo4j.exceptions import GraphQueryError
 from .exceptions import RecommendationError, InvalidCaseError
 
 logger = logging.getLogger(__name__)

@@ -45,6 +45,37 @@ class RAGRetriever:
             raw_items = response.payload.get("items", [])
             if isinstance(raw_items, list):
                 items = [item for item in raw_items if isinstance(item, dict)]
+                
+        # Qdrant Hybrid Search Integration
+        try:
+            from qdrant_client import QdrantClient
+            from fastembed import TextEmbedding
+            import os
+            
+            qdrant_url = os.environ.get("QDRANT_HOST")
+            qdrant_api_key = os.environ.get("QDRANT_API_KEY")
+            
+            if qdrant_url and qdrant_api_key:
+                client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
+                embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                embeddings = list(embedding_model.embed([question]))
+                
+                search_result = client.search(
+                    collection_name="vigilx_cases",
+                    query_vector=embeddings[0].tolist(),
+                    limit=3
+                )
+                for point in search_result:
+                    items.append({
+                        "source": "qdrant_vector_search",
+                        "id": point.id,
+                        "score": point.score,
+                        "content": point.payload.get("text", "")
+                    })
+        except Exception as e:
+            # Fallback gracefully if Qdrant is unavailable or not configured
+            pass
+
         items = items[: settings.max_context_items]
 
         citations: list[Citation] = []
