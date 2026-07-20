@@ -8,89 +8,126 @@ class CrimeType(models.TextChoices):
     THEFT = 'THEFT', 'Theft'
     BURGLARY = 'BURGLARY', 'Burglary'
     ROBBERY = 'ROBBERY', 'Robbery'
-    ASSAULT = 'ASSAULT', 'Assault'
-    HOMICIDE = 'HOMICIDE', 'Homicide'
-    CYBERCRIME = 'CYBERCRIME', 'Cybercrime'
-    FRAUD = 'FRAUD', 'Fraud'
-    DRUGS = 'DRUGS', 'Drugs'
 
 class CaseStatus(models.TextChoices):
     PENDING = 'PENDING', 'Pending'
     UNDER_INVESTIGATION = 'UNDER_INVESTIGATION', 'Under Investigation'
-    SOLVED = 'SOLVED', 'Solved'
-    CLOSED = 'CLOSED', 'Closed'
 
 class GenderChoices(models.TextChoices):
     MALE = 'MALE', 'Male'
     FEMALE = 'FEMALE', 'Female'
-    OTHER = 'OTHER', 'Other'
     UNKNOWN = 'UNKNOWN', 'Unknown'
 
 class AccusedStatus(models.TextChoices):
     SUSPECT = 'SUSPECT', 'Suspect'
     ACCUSED = 'ACCUSED', 'Accused'
-    ARRESTED = 'ARRESTED', 'Arrested'
-    CONVICTED = 'CONVICTED', 'Convicted'
 
 class ClueEntityType(models.TextChoices):
     PHONE_NUMBER = 'PHONE_NUMBER', 'Phone Number'
-    VEHICLE_PLATE = 'VEHICLE_PLATE', 'Vehicle Plate'
-    EMAIL = 'EMAIL', 'Email'
-    IP_ADDRESS = 'IP_ADDRESS', 'IP Address'
-    BANK_ACCOUNT = 'BANK_ACCOUNT', 'Bank Account'
-    SUSPECT_NICKNAME = 'SUSPECT_NICKNAME', 'Suspect Nickname'
 
-class FIR(BaseModel):
-    fir_number = models.CharField(max_length=100, unique=True)
-    crime_type = models.CharField(max_length=30, choices=CrimeType.choices, default=CrimeType.THEFT)
-    incident_date_time = models.DateTimeField()
-    reported_date_time = models.DateTimeField()
-    location = models.CharField(max_length=255)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    status = models.CharField(max_length=30, choices=CaseStatus.choices, default=CaseStatus.PENDING)
-    description = models.TextField()
-    officer_in_charge = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='assigned_cases'
-    )
+class FIR(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='casemasterid')
+    fir_number = models.CharField(max_length=100, db_column='crimeno', null=True, blank=True)
+    description = models.TextField(db_column='brieffacts', null=True, blank=True)
+    incident_date_time = models.DateTimeField(db_column='incidentfromdate', null=True, blank=True)
+    reported_date_time = models.DateTimeField(db_column='crimeregistereddate', null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.fir_number} ({self.crime_type})"
+    @property
+    def crime_type(self): return CrimeType.THEFT
+    @property
+    def status(self): return CaseStatus.PENDING
+    @property
+    def location(self): return None
+    @property
+    def latitude(self): return None
+    @property
+    def longitude(self): return None
+    @property
+    def officer_in_charge(self): return None
+    @property
+    def created_at(self): return self.reported_date_time
+    @property
+    def updated_at(self): return self.reported_date_time
 
-class Victim(BaseModel):
-    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, related_name='victims')
-    name = models.CharField(max_length=255)
-    age = models.IntegerField(null=True, blank=True)
-    gender = models.CharField(max_length=20, choices=GenderChoices.choices, default=GenderChoices.UNKNOWN)
-    contact_number = models.CharField(max_length=50, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)
-    statement = models.TextField(null=True, blank=True)
+    class Meta:
+        managed = False
+        db_table = 'casemaster'
 
-    def __str__(self):
-        return f"{self.name} - Victim of {self.fir.fir_number}"
+class Victim(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='victimmasterid')
+    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, db_column='casemasterid', related_name='victims', null=True, blank=True)
+    name = models.CharField(max_length=255, db_column='victimname', null=True, blank=True)
+    age = models.IntegerField(db_column='ageyear', null=True, blank=True)
 
-class Accused(BaseModel):
-    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, related_name='accused')
-    name = models.CharField(max_length=255)
-    age = models.IntegerField(null=True, blank=True)
-    gender = models.CharField(max_length=20, choices=GenderChoices.choices, default=GenderChoices.UNKNOWN)
-    contact_number = models.CharField(max_length=50, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)
-    criminal_history = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=30, choices=AccusedStatus.choices, default=AccusedStatus.SUSPECT)
+    @property
+    def gender(self): return GenderChoices.UNKNOWN
+    @property
+    def contact_number(self): return None
+    @property
+    def address(self): return None
+    @property
+    def statement(self): return None
+    @property
+    def created_at(self): return None
+    @property
+    def updated_at(self): return None
 
-    def __str__(self):
-        return f"{self.name} - {self.status} in {self.fir.fir_number}"
+    class Meta:
+        managed = False
+        db_table = 'victim'
+
+class Complainant(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='complainantid')
+    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, db_column='casemasterid', related_name='complainants', null=True, blank=True)
+    name = models.CharField(max_length=255, db_column='complainantname', null=True, blank=True)
+    age = models.IntegerField(db_column='ageyear', null=True, blank=True)
+
+    @property
+    def gender(self): return GenderChoices.UNKNOWN
+    @property
+    def contact_number(self): return None
+    @property
+    def address(self): return None
+    @property
+    def created_at(self): return None
+    @property
+    def updated_at(self): return None
+
+    class Meta:
+        managed = False
+        db_table = 'complainantdetails'
+
+class Accused(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='accusedmasterid')
+    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, db_column='casemasterid', related_name='accused', null=True, blank=True)
+    name = models.CharField(max_length=255, db_column='accusedname', null=True, blank=True)
+    age = models.IntegerField(db_column='ageyear', null=True, blank=True)
+
+    @property
+    def gender(self): return GenderChoices.UNKNOWN
+    @property
+    def contact_number(self): return None
+    @property
+    def address(self): return None
+    @property
+    def criminal_history(self): return None
+    @property
+    def status(self): return AccusedStatus.SUSPECT
+    @property
+    def created_at(self): return None
+    @property
+    def updated_at(self): return None
+
+    class Meta:
+        managed = False
+        db_table = 'accused'
 
 class ClueEntity(BaseModel):
-    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, related_name='entities')
+    fir = models.ForeignKey(FIR, on_delete=models.CASCADE, related_name='entities', null=True, blank=True)
     entity_type = models.CharField(max_length=30, choices=ClueEntityType.choices)
     value = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
 
-    def __str__(self):
-        return f"{self.entity_type}: {self.value} ({self.fir.fir_number})"
+    class Meta:
+        managed = False
+        db_table = 'cases_clueentity'

@@ -31,11 +31,20 @@ class EvidenceService:
         if not isinstance(row, dict):
             return str(row)
 
-        keys = ["id", "case_id", "fir_id", "accused_id", "victim_id", "name", "status", "summary", "description", "timestamp", "source", "snippet"]
         parts = []
-        for key in keys:
-            if key in row and row[key] is not None:
-                parts.append(f"{key}={row[key]}")
+        for key, value in row.items():
+            if value is None:
+                continue
+            if isinstance(value, list) and value:
+                nested = []
+                for item in value:
+                    if isinstance(item, dict):
+                        nested.append("{" + ", ".join(f"{k}={v}" for k, v in item.items() if v is not None) + "}")
+                    else:
+                        nested.append(str(item))
+                parts.append(f"{key}=[" + " | ".join(nested) + "]")
+            elif str(value).strip():
+                parts.append(f"{key}={value}")
         if parts:
             return "; ".join(parts)
         return str(row)
@@ -58,10 +67,18 @@ class EvidenceService:
         intent: str,
     ) -> bool:
         required = self.required_citations_for_intent(intent)
+        
+        # Adaptive Threshold: If exactly 1 high-quality record exists and is retrieved from the Django REST API,
+        # adapt the threshold to 1 so the user gets the answer instead of a fallback "unavailable".
+        if len(citations) == 1 and any(c.source in {"django_api", "accused_records", "victim_records", "case_search", "case_summary"} for c in citations):
+            required = 1
+            
         return len(citations) >= required and bool(evidence_text.strip())
 
     def confidence_level(self, citations: list[Citation], intent: str) -> str:
         required = self.required_citations_for_intent(intent)
+        if len(citations) == 1 and any(c.source in {"django_api", "accused_records", "victim_records", "case_search", "case_summary"} for c in citations):
+            required = 1
         count = len(citations)
         source_count = len(self.source_breakdown(citations))
 

@@ -1,0 +1,303 @@
+# VigilX — Feature Gap Analysis
+### Problem Statement vs. Current Implementation
+
+This document compares every feature in the Comprehensive Feature Catalog against what exists in the current VigilX-BE codebase, and produces a prioritized implementation roadmap.
+
+---
+
+## Legend
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ | Fully implemented |
+| 🟡 | Partially implemented (skeleton / scaffold exists) |
+| ❌ | Not implemented at all |
+| 🔧 | Exists but broken / misconfigured |
+
+---
+
+## 1. Conversational Crime Intelligence Interface
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 1.1 | Natural Language Query (NLQ) | 🟡 | `agents/workflow.py` has 5-node LangGraph pipeline; intent detector, RAG retriever, LLM answering. | REST endpoint env-vars not wired to Django, so answers have no real data. |
+| 1.2 | Voice Input & Output | ❌ | No STT/TTS code anywhere. | Entire module missing. |
+| 1.3 | Contextual Multi-Turn Chat | 🟡 | `services/conversation_service.py` persists turn history to a JSON file; LLM prompt includes `conversation_summary`. | Max 12 items, no Redis/DB-backed persistence for scale; no session management. |
+| 1.4 | Multi-language Support (Kannada) | ❌ | No multilingual handling, translation layer, or locale configuration. | Entire module missing. |
+| 1.5 | Conversation History & Export (PDF) | ❌ | Conversation is stored in a JSON file locally; no UI endpoint to fetch/export it. | No `/ai/history` endpoint and no PDF export. |
+| 1.6 | Autosuggest & Query Guidance | ❌ | No autocomplete or suggestion API. | Entire module missing. |
+| 1.7 | Federated Search (SQL + Docs) | 🟡 | RAGRetriever calls REST gateway and merges results; SQL planner routes intent to REST endpoints. | Qdrant vector retrieval is **not integrated** (RAG still uses REST-only; no actual vector search call). |
+| 1.8 | User-Friendly Chat Interface | ❌ | No frontend exists in repo. | Entire frontend missing. |
+| 1.9 | Audit / CJIS-compliant Query Log | 🟡 | AuditLogMiddleware logs all mutating API calls. | AI `/ai/ask` calls are **not audited** (they bypass Django middleware). |
+| 1.10 | Connected Query Chaining | 🟡 | Single intent → single REST call per request. | No sub-query decomposition; cannot break "crimes of female victims under 18 in 2025" into compound filters. |
+
+---
+
+## 2. Data & Document Ingestion, Management, and Retrieval
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 2.1 | Structured Crime DB (PostgreSQL) | 🔧 | Schema defined in `database/postgres/schema.sql`; Django models exist in `apps/cases/models.py`. | **Critical env-var mismatch** — Django falls back to SQLite; Neon PG not connected. Django model `@property` bug breaks ORM writes. |
+| 2.2 | Unstructured Document Repository | ❌ | `media/` folder configured in `settings.py`. No document upload endpoint, OCR, or transcript service. | Entire module missing. |
+| 2.3 | Semantic Search / RAG (Vector) | 🟡 | Qdrant collection `crime_cases` initialized, seed script generates embeddings via `fastembed`. RAGRetriever scaffolded in workflow. | Actual Qdrant query client not called in workflow — the RAG still routes through REST REST gateway only. |
+| 2.4 | Cross-Source Search | ❌ | No connectors for RMS, CAD, NIBIN, LPR, or external agency data. | Entire module missing. |
+| 2.5 | Case Folders & Evidence Linking | ❌ | No case-folder concept, no file-to-case linking model. | Entire module missing. |
+| 2.6 | Bulk Upload & APIs | ❌ | No bulk import endpoint exists. REST APIs exist only for single-record CRUD. | Entire module missing. |
+| 2.7 | Data Cleansing & Enrichment | ❌ | No deduplication, geocoding, or enrichment logic anywhere. | Entire module missing. |
+| 2.8 | Secure Data Access (RBAC) | ✅ | `api/permissions/rbac.py` with `IsSupervisor`, `IsCaseWriteAuthorized`, `DenyPolicymakerPII` enforced on all DRF views. | Minor gap: Logout does not blacklist refresh tokens. |
+
+---
+
+## 3. Criminal Network & Relationship Analysis
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 3.1 | Knowledge Graph Construction | 🟡 | Neo4j constraints defined (`database/neo4j/constraints.cypher`); `graph/builder.py` merges Case, Accused, Victim nodes. `services/ingestion/extractor.py` parses Django payloads. | **No trigger wires** — `CaseExtractor` is only called in unit tests, never on actual case creation. |
+| 3.2 | Link / Graph Visualization | ❌ | No API endpoint exposes graph data to a frontend. No visualization library integrated. | Entire module missing. |
+| 3.3 | Community Detection | ❌ | `analytics/network.py` finds co-accused pairs with `find_syndicates()`. | Not exposed as an API. No graph algorithm (Louvain, etc.) integrated. |
+| 3.4 | Role & Centrality Analysis | ❌ | No centrality algorithms (betweenness, k-core) implemented. | Entire module missing. |
+| 3.5 | Entity Resolution | ❌ | No deduplication or fuzzy-name matching in graph or relational layers. | Entire module missing. |
+| 3.6 | Social Network Analysis Queries | 🟡 | `recommendation/engine.py` does 2nd-degree suspect traversal in Cypher. | Not exposed via REST API. No "shortest path" or custom traversal queries. |
+| 3.7 | Geographic Relationship Mapping | ❌ | Latitude/longitude stored as `@property` returning `None` in Django model (broken). | Entire module missing. |
+| 3.8 | Temporal Dynamics | ❌ | No time-slider or temporal graph queries. | Entire module missing. |
+| 3.9 | Hidden Link Discovery | 🟡 | `recommendation/engine.py` finds non-obvious shared history through 2nd-degree traversal. | Not integrated in the AI workflow or exposed as API. |
+| 3.10 | Knowledge Graph + LLM Synthesis | ❌ | Graph analytics are separate from LLM pipeline in `workflow.py`. | No integration between Neo4j graph results and LLM context enrichment in the AI workflow. |
+| 3.11 | Interactive Graph Queries | ❌ | No UI, no graph query API. | Entire module missing. |
+| 3.12 | Subgraph Export | ❌ | No export functionality. | Entire module missing. |
+
+---
+
+## 4. Crime Pattern & Trend Analytics
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 4.1 | Spatio-Temporal Crime Trends | ❌ | No time-series analysis or heatmap generation. | Entire module missing. |
+| 4.2 | Seasonal / Event-based Analysis | ❌ | No calendar overlay or event-based correlation. | Entire module missing. |
+| 4.3 | Modus Operandi (MO) Analytics | ❌ | `CrimeType` enum exists (THEFT, BURGLARY, ROBBERY) with only 3 options. No MO tracking or correlation. | Entire module missing. |
+| 4.4 | Comparative Dashboards | ❌ | No analytics dashboard or comparison endpoints. | Entire module missing. |
+| 4.5 | Anomaly Detection | ❌ | No statistical analysis or anomaly-detection algorithms. | Entire module missing. |
+| 4.6 | Interactive Visualization | ❌ | No frontend or chart library integration. | Entire module missing. |
+| 4.7 | GIS Integration | ❌ | No GIS library, map tile server, or geospatial API. | Entire module missing. |
+| 4.8 | Alerts on Emerging Clusters | ❌ | No alerting / notification system. | Entire module missing. |
+| 4.9 | Pattern Mining | ❌ | No unsupervised clustering on crime reports. | Entire module missing. |
+| 4.10 | Multi-Dimensional Filters | 🟡 | `FIRViewSet.get_queryset()` filters by status, crime_type, officer_id, date range, keyword. | Fields like `status`, `crime_type` are broken `@property` descriptors, not real DB fields. Filters are incomplete. |
+
+---
+
+## 5. Sociological & Demographic Crime Insights
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 5.1 | Demographic Breakdown | ❌ | `age`, `gender` fields exist in `Victim` and `Accused` models. No aggregation API. | No aggregation endpoint, no charts. |
+| 5.2 | Socioeconomic Correlation | ❌ | No external dataset integration. | Entire module missing. |
+| 5.3 | Population Density & Urbanization | ❌ | No population data layer. | Entire module missing. |
+| 5.4 | Migration & Mobility Patterns | ❌ | No mobility data. | Entire module missing. |
+| 5.5 | Risk Factor Analysis | ❌ | No statistical correlation models. | Entire module missing. |
+| 5.6 | Public Safety Index | ❌ | No composite scoring. | Entire module missing. |
+| 5.7 | Interactive Socio-Crime Reports | ❌ | No dashboard or report linking crime and social data. | Entire module missing. |
+
+---
+
+## 6. Criminology-Based Offender Profiling
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 6.1 | Repeat Offender Identification | ❌ | No automatic flagging of habitual offenders. | Entire module missing. |
+| 6.2 | Behavioral Pattern Clustering | ❌ | No ML clustering on offender behavior. | Entire module missing. |
+| 6.3 | MO Tracking Per Offender | ❌ | MO not tracked at offender level. | Entire module missing. |
+| 6.4 | Network-Based Profiling | 🟡 | `profiling/generator.py` computes `known_associates_count` and `case_history` from Neo4j. | Not exposed as a REST endpoint; risk scoring is heuristic only (linear formula). |
+| 6.5 | Risk Scoring | 🟡 | `ProfileGenerator.calculate_risk_score()` produces a 0–100 score from case count and associate count. | Very simplistic formula. Not integrated into Django API. |
+| 6.6 | Demographic Profiling | ❌ | Only `age_group` stored; no multi-factor demographic profiling. | Entire module missing. |
+| 6.7 | Predictive Recidivism | ❌ | No ML model for recidivism prediction. | Entire module missing. |
+| 6.8 | Criminological Theory Linking | ❌ | No framework for tagging cases with criminological theories. | Entire module missing. |
+| 6.9 | Offender "Story" Generation (LLM Narrative Profile) | ❌ | LLM can answer questions about suspects, but no dedicated "generate profile narrative" endpoint or prompt. | Needs dedicated prompt + API. |
+| 6.10 | Historical Pattern Reference | ❌ | No case-similarity matching against historical offender profiles. | Entire module missing. |
+
+---
+
+## 7. Investigator Decision Support
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 7.1 | Automated Case Summaries | 🟡 | `services/case_summary_service.py` generates a structured JSON summary via LLM for `case_lookup` / `timeline_query` intents. | Summary only generated inside AI workflow; no standalone `/cases/{id}/summary` endpoint accessible from Django API. |
+| 7.2 | Investigation Timelines | ❌ | `InvestigationLog` records timestamped entries. No timeline view or endpoint combining FIR events + logs. | No timeline aggregation endpoint or visual. |
+| 7.3 | Similarity Search (Case Retrieval) | ❌ | No case-similarity search against historical records. | Entire module missing. |
+| 7.4 | Recommended Leads & Next Actions | 🟡 | `recommendation/engine.py` suggests suspects. | Not connected to the AI workflow or any API endpoint. |
+| 7.5 | Automated Alerts to Officers | ❌ | No notification system (email, push, webhook). | Entire module missing. |
+| 7.6 | Report Generation (Briefing Notes) | ✅ | `apps/reports/views.py` generates a structured PDF using ReportLab with all case sections and PII redaction. | Minor: Only PDF export, no Word/HTML template. |
+| 7.7 | Contextual FAQs / Case Status Q&A | 🟡 | AI `/ai/ask` endpoint can answer case-status questions via NLQ. | Broken because REST endpoints are not configured in env. |
+| 7.8 | Integration with Forensic/CID Systems | ❌ | No integration layer for external forensic systems. | Entire module missing. |
+| 7.9 | Evidence Recommendation | ❌ | No gap-detection logic in case evidence. | Entire module missing. |
+| 7.10 | Analytics for Resource Allocation | ❌ | No supervisor analytics dashboard. | Entire module missing. |
+
+---
+
+## 8. Financial Crime & Transaction Link Analysis
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 8.1 | Transaction Network Graphs | ❌ | No financial entity modeled anywhere in the DB schema or graph. | Entire module missing. |
+| 8.2 | Suspicious Transaction Detection | ❌ | No ML model or rule engine for suspicious transactions. | Entire module missing. |
+| 8.3 | Linking Financial and Criminal Entities | ❌ | No bank account or financial transaction schema. | Entire module missing. |
+| 8.4 | Integrated AML Workflows | ❌ | No AML system connector. | Entire module missing. |
+| 8.5 | Cross-Border Tracing | ❌ | No international database interface. | Entire module missing. |
+| 8.6 | Visualization of Money Trails | ❌ | No financial flow diagram. | Entire module missing. |
+| 8.7 | Case-Centric Finance Reports | ❌ | No financial report template in `apps/reports`. | Entire module missing. |
+| 8.8 | Pattern Matching (Fraud Detection) | ❌ | No fraud pattern ML model. | Entire module missing. |
+
+---
+
+## 9. Crime Forecasting & Early Warning
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 9.1 | Hotspot Prediction | ❌ | `forecasting/` directory exists but no content visible beyond placeholder files and a test. | Entire predictive model missing. |
+| 9.2 | Gang Activity Alerts | ❌ | No monitoring or alerting for gang network changes. | Entire module missing. |
+| 9.3 | Trend Extrapolation | ❌ | No time-series or ARIMA/LSTM models. | Entire module missing. |
+| 9.4 | Early Warning Notifications | ❌ | No notification system. | Entire module missing. |
+| 9.5 | Predictive Resource Allocation | ❌ | No prediction-based staffing recommendation. | Entire module missing. |
+| 9.6 | Adaptive Learning (Retraining) | ❌ | No model registry or retraining pipeline. | Entire module missing. |
+| 9.7 | Event-Driven Forecasting | ❌ | No event / calendar data integration. | Entire module missing. |
+| 9.8 | Re-Offender Alerts | ❌ | No scheduled prediction jobs. | Entire module missing. |
+
+---
+
+## 10. Explainable AI & Transparent Analytics
+
+| # | Feature | Status | Evidence in Code | Gap |
+|---|---------|--------|-----------------|-----|
+| 10.1 | Evidence-Backed Responses | 🟡 | `StandardResponse` schema returns `citations` list. LLM prompt instructs evidence-grounded answers. | REST data not flowing (env gap), so real citations are not generated in practice. |
+| 10.2 | Reasoning Visualization | ❌ | `metadata.query_plan` is returned in response JSON. | No UI to display reasoning path; no subgraph highlight capability. |
+| 10.3 | Audit Trail (AI Query Log) | ❌ | AuditLogMiddleware only covers Django. FastAPI `/ai/ask` calls are not audited. | Needs audit middleware on FastAPI router. |
+| 10.4 | Confidence / Sensitivity Scores | 🟡 | `confidence` field (`high`/`medium`/`low`) returned in `ResponseMetadata`. | Confidence logic is basic citation count only — not evidence quality. |
+| 10.5 | User Verification ("Show Sources") | 🟡 | `citations` list with source, snippet, and reference_id included in response. | No UI; sources not linked back to case record IDs from real DB. |
+| 10.6 | Model Transparency Controls | ❌ | No admin panel or API to inspect LLM version or prompt configs. | Entire module missing. |
+| 10.7 | Explainable ML Models | ❌ | Risk score formula is hard-coded, not documented or visualized. | No decision-tree or explainability layer. |
+| 10.8 | Feedback Loop | ❌ | No endpoint or UI for investigators to rate AI answers. | Entire module missing. |
+| 10.9 | Ethical Guardrails | ❌ | No bias-detection, fairness checks, or content filters on prompts/responses. | Entire module missing. |
+
+---
+
+## Summary Scorecard
+
+| Category | Total Features | ✅ Done | 🟡 Partial | ❌ Missing | 🔧 Broken |
+|----------|--------------|---------|------------|-----------|----------|
+| 1. Conversational Interface | 10 | 0 | 4 | 6 | 0 |
+| 2. Data Ingestion & Retrieval | 8 | 1 | 2 | 5 | 0 |
+| 3. Criminal Network Analysis | 12 | 0 | 3 | 9 | 0 |
+| 4. Crime Pattern Analytics | 10 | 0 | 1 | 9 | 0 |
+| 5. Sociological Insights | 7 | 0 | 0 | 7 | 0 |
+| 6. Offender Profiling | 10 | 0 | 2 | 8 | 0 |
+| 7. Investigator Decision Support | 10 | 1 | 3 | 6 | 0 |
+| 8. Financial Crime Analysis | 8 | 0 | 0 | 8 | 0 |
+| 9. Crime Forecasting | 8 | 0 | 0 | 8 | 0 |
+| 10. Explainable AI | 9 | 0 | 3 | 6 | 0 |
+| **TOTAL** | **92** | **2 (2%)** | **18 (20%)** | **72 (78%)** | **0*** |
+
+> *The 🔧 Broken items (env mismatch, ORM property bug, unconfigured REST paths) affect the partial implementations and make them effectively non-functional.
+
+---
+
+## Prioritized Implementation Roadmap
+
+### 🚨 Phase 0 — Critical Fixes (Must be done before anything else works)
+
+> These are blockers. Nothing else will function correctly until these are fixed.
+
+| Priority | Fix | File(s) | Impact |
+|----------|-----|---------|--------|
+| P0-1 | **Fix Django env-var names** — rename `POSTGRES_USER/DB/PASSWORD` to `DB_USER/DB_NAME/DB_PASSWORD` in `.env` **or** fix `settings.py` to read from `POSTGRES_*` vars. | `config/settings.py`, `.env` | Django connects to Neon PostgreSQL instead of SQLite |
+| P0-2 | **Fix .env path** — move `.env` to workspace root `d:\VigilX-BE\.env` **or** correct `load_dotenv()` paths in `settings.py` and `utils/config.py`. | `config/settings.py`, `ai-engine/utils/config.py` | Both servers load credentials correctly |
+| P0-3 | **Fix Django ORM model** — add real database fields to `FIR`, `Victim`, `Accused` models (crime_type, status, location, latitude, longitude, gender, etc.) removing `@property` stubs. Set `managed = True` and run migrations. | `apps/cases/models.py` | Seeds, tests, and CRUD all work |
+| P0-4 | **Wire AI Engine REST endpoints** — add `AI_ENGINE_REST_*_PATH` env variables for `case_search`, `accused_records`, `victim_records`, `crime_records`, `case_summary`, `investigation_status`. | `.env`, `ai-engine/utils/config.py` | `/ai/ask` successfully fetches real data from Django |
+| P0-5 | **Add token blacklisting** — install `rest_framework_simplejwt.token_blacklist` to `INSTALLED_APPS` and call `token.blacklist()` in `LogoutView`. | `config/settings.py`, `apps/authentication/views.py` | Logout properly invalidates tokens |
+
+---
+
+### ⚡ Phase 1 — Core AI Pipeline Completion
+
+> Features that are partially built but need to be wired end-to-end.
+
+| Priority | Feature | What to Build |
+|----------|---------|--------------|
+| P1-1 | **Qdrant Vector Search Integration** | Replace the `RAGRetriever` REST-only path with a direct `QdrantClient.search()` call using `fastembed` to embed the query at runtime. Return semantic vector results merged with REST records. |
+| P1-2 | **Graph Sync on Case Creation** | Add a Django post_save signal on `FIR` / `Victim` / `Accused` models (or a Celery task) that calls `CaseExtractor.process_case_payload()` to sync new records into Neo4j after every write. |
+| P1-3 | **Graph Analytics REST API** | Add FastAPI routers exposing: `GET /ai/graph/suspects/{case_id}/recommend`, `GET /ai/graph/profile/{person_id}`, `GET /ai/graph/syndicates` — each calling the existing `RecommendationEngine`, `ProfileGenerator`, and `NetworkAnalyzer`. |
+| P1-4 | **AI Audit Log** | Add FastAPI middleware (or a Depends function) that records every `/ai/ask` request to Django's `AuditLog` table via an internal API call or shared database connection. |
+| P1-5 | **Case AI Summary Endpoint** | Expose a Django endpoint `GET /api/cases/{id}/ai-summary/` that proxies to the FastAPI AI engine, passing the FIR full-detail payload and returning the structured `CaseSummary` JSON. |
+| P1-6 | **Investigation Timeline Endpoint** | Build `GET /api/cases/{id}/timeline/` that aggregates `FIR` creation dates, `InvestigationLog` entries, and `ArrestSurrender` events in chronological order. |
+
+---
+
+### 🏗️ Phase 2 — Analytics & Pattern Modules
+
+| Priority | Feature | What to Build |
+|----------|---------|--------------|
+| P2-1 | **Crime Statistics Aggregation API** | Django endpoints: `GET /api/analytics/crime-counts/` with filters for time range, district, crime type. Aggregate using Django ORM `annotate(count=Count(...))`. |
+| P2-2 | **Demographic Breakdown Analytics** | `GET /api/analytics/demographics/` returning age distribution, gender ratio for accused and victims per crime type using DB aggregations. |
+| P2-3 | **Repeat Offender Detection** | A Django management command + API endpoint `GET /api/accused/{id}/history/` that counts all FIRs linked to an accused and flags habitual offenders (≥3 cases). |
+| P2-4 | **Keyword & Semantic Case Similarity** | A `GET /api/cases/{id}/similar/` endpoint that embeds the case description via `fastembed` and queries Qdrant for nearest neighbors, returning a list of similar historical cases. |
+| P2-5 | **MO Tracking & Crime Type Expansion** | Expand `CrimeType` choices to the full IPC/BNS classification. Add a `MO` (Modus Operandi) free-text field to `FIR`. Build aggregation endpoint `GET /api/analytics/modus-operandi/`. |
+| P2-6 | **Spatio-Temporal Heatmap Data API** | `GET /api/analytics/heatmap/?crime_type=&date_start=&date_end=` returning GeoJSON FeatureCollection of lat/lng points for map visualization. |
+| P2-7 | **Graph Visualization Data API** | `GET /api/analytics/graph/{entity_id}` calling Neo4j to return nodes and edges in a standard format (e.g., `{nodes: [...], links: [...]}`) consumable by D3.js or similar. |
+
+---
+
+### 🧠 Phase 3 — Advanced AI Capabilities
+
+| Priority | Feature | What to Build |
+|----------|---------|--------------|
+| P3-1 | **Multi-Turn Query Chaining** | Upgrade intent service to decompose compound queries ("female victims under 18 in 2025") into multiple structured sub-queries with parameter binding, executed in sequence. |
+| P3-2 | **Offender Story Generation** | New prompt template `offender_profile_v1.txt` and dedicated service `OffenderNarrativeService` that reads graph profile data and asks LLM to generate a readable investigative brief. |
+| P3-3 | **Evidence Recommendation** | Add a post-processing step in the AI workflow that compares case evidence against a checklist of expected evidence types (cell tower, CCTV, bank statement) and highlights gaps. |
+| P3-4 | **Recommended Leads in AI Workflow** | Integrate `RecommendationEngine.recommend_suspects()` as a new graph node in the LangGraph state machine — enriching the AI answer with proactive suspect leads from the graph. |
+| P3-5 | **Confidence & Explainability Metadata** | Expand `ResponseMetadata` to include which sources contributed to the answer, the citation snippets as markdown footnotes, and the full query plan as a readable string. |
+| P3-6 | **Feedback Loop Endpoint** | `POST /ai/feedback` accepting `{query_id, rating: 1-5, comment}` stored in a `AIFeedback` model for model improvement tracking. |
+
+---
+
+### 🔮 Phase 4 — Forecasting & Advanced Analytics (Advanced)
+
+| Priority | Feature | What to Build |
+|----------|---------|--------------|
+| P4-1 | **Crime Forecasting Model** | A Python time-series model (e.g., Prophet or ARIMA via `statsmodels`) trained on historical FIR counts grouped by district and crime type, predicting next 30-day hotspot risk. |
+| P4-2 | **Anomaly Detection** | Statistical Z-score or Isolation Forest model detecting unusual crime clusters or sudden spikes. Runs as a daily scheduled task (Celery Beat). |
+| P4-3 | **Predictive Recidivism Score** | Logistic regression or gradient boosting model trained on historical accused records, estimating re-offense probability. Score appended to `Accused` profile API. |
+| P4-4 | **Alerting & Notification System** | Celery-based periodic task that evaluates anomaly and hotspot models, sends alerts via Django Signals → Email / Webhook to subscribed officer accounts. |
+| P4-5 | **Financial Transaction Graph** | New `BankAccount` and `Transaction` models in PostgreSQL; new Neo4j node types `(:BankAccount)` and `[:TRANSFERRED_TO]` edges. REST and graph query APIs for financial networks. |
+| P4-6 | **Community Detection Algorithms** | Implement Louvain community detection via `networkx` or the Neo4j GDS (Graph Data Science) plugin to identify criminal gangs and rank by size and centrality. |
+
+---
+
+### 🌐 Phase 5 — Interface, Multilingual, and Voice (Frontend-Level)
+
+| Priority | Feature | What to Build |
+|----------|---------|--------------|
+| P5-1 | **Frontend Chat UI** | A React / Next.js front-end application with a conversational chat panel, case list, and analytics dashboards. |
+| P5-2 | **Voice Input (STT)** | Integrate a Speech-to-Text service (e.g., `whisper.cpp` locally or Google Cloud STT) as a FastAPI endpoint `POST /ai/transcribe`. |
+| P5-3 | **Voice Output (TTS)** | Integrate a TTS engine for reading back AI answers. |
+| P5-4 | **Multi-language (Kannada)** | Integrate an NMT translation layer (e.g., IndicTrans2 or Google Translate API) in the AI workflow — detect query language, translate to English for LLM, translate response back. |
+| P5-5 | **Conversation History UI & Export** | `GET /ai/history/{user_id}/{session_id}` and a `GET /ai/history/{user_id}/{session_id}/export.pdf` endpoint. |
+| P5-6 | **Autosuggest API** | `GET /api/suggest/?q=vehic` returning top-5 matching crime types, FIR numbers, or suspect names from database prefix queries. |
+| P5-7 | **Graph Visualization UI** | Integrate D3.js or Sigma.js in the frontend; connect to `GET /api/analytics/graph/{entity_id}`. |
+| P5-8 | **Interactive Heatmap** | Integrate a mapping library (Leaflet.js or Mapbox) in the frontend connected to the heatmap API. |
+
+---
+
+## What IS Currently Working (Confirmed Implementation)
+
+Only the following are genuinely functional in the current codebase:
+
+1. ✅ **JWT Authentication** — Login, refresh, and logout endpoints work correctly.
+2. ✅ **User Profile & RBAC enforcement** — Role-based access is enforced on all Django views with correct permission classes.
+3. ✅ **PII Dynamic Redaction** — `[REDACTED]` substitution for Policymaker role works correctly in serializers.
+4. ✅ **PDF Case Report** — `CaseReportView` generates ReportLab PDFs with all sections (FIR, victims, accused, clues, diary).
+5. ✅ **Audit Middleware** — Logs all mutating requests and login attempts with sanitized payloads.
+6. ✅ **LangGraph AI Orchestration Scaffold** — The 5-node pipeline (conversation → intent → retrieve → sql → reason) exists and is architecturally sound. Once env vars are fixed, it will function.
+7. ✅ **Neo4j Schema & Analytics Code** — `RecommendationEngine`, `ProfileGenerator`, `NetworkAnalyzer`, and `GraphBuilder` contain correct Cypher queries. Need API exposure only.
+8. ✅ **Conversation Memory** — JSON-file-backed conversation history with trimming works correctly.
+9. ✅ **Evidence Confidence Scoring** — Citation count-based confidence levels are computed and returned in response metadata.
+
+---
+
+*End of Gap Analysis.*

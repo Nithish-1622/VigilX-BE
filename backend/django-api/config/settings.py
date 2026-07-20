@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables
-load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR.parent.parent / '.env')
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
@@ -21,6 +21,7 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.s
 
 # Application definition
 INSTALLED_APPS = [
+    "apps.common.apps.CommonConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -33,7 +34,6 @@ INSTALLED_APPS = [
     "corsheaders",
     
     # Namespaced Apps
-    "apps.common.apps.CommonConfig",
     "apps.users.apps.UsersConfig",
     "apps.authentication.apps.AuthenticationConfig",
     "apps.cases.apps.CasesConfig",
@@ -93,8 +93,14 @@ if DB_NAME and DB_USER and DB_PASSWORD:
             "PASSWORD": DB_PASSWORD,
             "HOST": DB_HOST,
             "PORT": DB_PORT,
+            "OPTIONS": {
+                "sslmode": "require",
+            }
         }
     }
+    db_endpoint = os.getenv("DB_ENDPOINT")
+    if db_endpoint:
+        DATABASES["default"]["OPTIONS"]["options"] = f"endpoint={db_endpoint}"
 else:
     DATABASES = {
         "default": {

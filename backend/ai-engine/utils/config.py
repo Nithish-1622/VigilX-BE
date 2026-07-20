@@ -3,6 +3,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from dataclasses import dataclass
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv(Path(__file__).resolve().parent.parent.parent.parent / ".env")
 
 
 @dataclass(frozen=True)
@@ -14,6 +18,7 @@ class Settings:
     llm_provider: str = os.getenv("AI_ENGINE_LLM_PROVIDER", "ollama")
     llm_model: str = os.getenv("AI_ENGINE_LLM_MODEL", "qwen3")
     llm_base_url: str = os.getenv("AI_ENGINE_LLM_BASE_URL", "http://localhost:11434")
+    llm_api_key: str = os.getenv("AI_ENGINE_LLM_API_KEY", "")
 
     api_gateway_base_url: str = os.getenv("AI_ENGINE_API_GATEWAY_BASE_URL", "")
     api_gateway_timeout_seconds: int | None = (

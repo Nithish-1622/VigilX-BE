@@ -15,6 +15,9 @@ env/
 .vscode/
 .idea/
 
+.env
+.env.local
+
 # Local/testing data
 conversation_history.json
 *.log
@@ -22,3 +25,8 @@ conversation_history.json
 
 # Databases (if local)
 *.sqlite3
+
+# Environment files
+.env
+backend/ai-engine/.env
+backend/django-api/.env
