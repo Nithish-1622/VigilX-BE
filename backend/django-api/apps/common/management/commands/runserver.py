@@ -44,8 +44,8 @@ class Command(StaticfilesRunserverCommand):
                 fastapi_proc = subprocess.Popen(
                     cmd,
                     cwd=ai_engine_dir,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.STDOUT
+                    stdout=sys.stdout,
+                    stderr=sys.stderr
                 )
                 self.stdout.write(self.style.SUCCESS(f"FastAPI server launched successfully (PID: {fastapi_proc.pid}) at http://127.0.0.1:8001"))
             except Exception as e:

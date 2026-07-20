@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
-from apps.cases.models import FIR, Victim, Accused, ClueEntity
+from .models import FIR, Victim, Accused, ClueEntity
 from api.serializers.cases import (
     FIRSerializer, FIRDetailSerializer, 
     VictimSerializer, AccusedSerializer, ClueEntitySerializer
@@ -33,6 +33,7 @@ class FIRViewSet(viewsets.ModelViewSet):
         date_start = self.request.query_params.get('date_start')
         date_end = self.request.query_params.get('date_end')
         search_query = self.request.query_params.get('search')
+        fir_id_val = self.request.query_params.get('fir_id')
         
         # Apply filters programmatically
         if status_val:
@@ -45,6 +46,13 @@ class FIRViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(incident_date_time__gte=date_start)
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
+        if fir_id_val:
+            import uuid
+            try:
+                uuid.UUID(fir_id_val)
+                queryset = queryset.filter(Q(fir_number=fir_id_val) | Q(id=fir_id_val))
+            except ValueError:
+                queryset = queryset.filter(fir_number=fir_id_val)
         if search_query:
             queryset = queryset.filter(
                 Q(fir_number__icontains=search_query) | 
@@ -82,9 +90,23 @@ class VictimViewSet(viewsets.ModelViewSet):
     Access is completely blocked for Policymakers.
     Write access is restricted to Investigators and Supervisors.
     """
-    queryset = Victim.objects.all().order_by('-created_at')
     serializer_class = VictimSerializer
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
+
+    def get_queryset(self):
+        queryset = Victim.objects.all().order_by('-created_at')
+        name_val = self.request.query_params.get('name')
+        fir_val = self.request.query_params.get('fir')
+        if name_val:
+            queryset = queryset.filter(name__icontains=name_val)
+        if fir_val:
+            import uuid
+            try:
+                uuid.UUID(fir_val)
+                queryset = queryset.filter(fir_id=fir_val)
+            except ValueError:
+                queryset = queryset.filter(fir__fir_number=fir_val)
+        return queryset
 
 
 class AccusedViewSet(viewsets.ModelViewSet):
@@ -93,9 +115,23 @@ class AccusedViewSet(viewsets.ModelViewSet):
     Access is completely blocked for Policymakers.
     Write access is restricted to Investigators and Supervisors.
     """
-    queryset = Accused.objects.all().order_by('-created_at')
     serializer_class = AccusedSerializer
     permission_classes = [IsAuthenticated, DenyPolicymakerPII, IsCaseWriteAuthorized]
+
+    def get_queryset(self):
+        queryset = Accused.objects.all().order_by('-created_at')
+        name_val = self.request.query_params.get('name')
+        fir_val = self.request.query_params.get('fir')
+        if name_val:
+            queryset = queryset.filter(name__icontains=name_val)
+        if fir_val:
+            import uuid
+            try:
+                uuid.UUID(fir_val)
+                queryset = queryset.filter(fir_id=fir_val)
+            except ValueError:
+                queryset = queryset.filter(fir__fir_number=fir_val)
+        return queryset
 
 
 class ClueEntityViewSet(viewsets.ModelViewSet):
@@ -139,3 +175,5 @@ class ClueEntityViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK)
             
         return super().list(request, *args, **kwargs)
+
+# Refreshed import path structures and hosts

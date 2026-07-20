@@ -57,10 +57,18 @@ class EvidenceService:
         intent: str,
     ) -> bool:
         required = self.required_citations_for_intent(intent)
+        
+        # Adaptive Threshold: If exactly 1 high-quality record exists and is retrieved from the Django REST API,
+        # adapt the threshold to 1 so the user gets the answer instead of a fallback "unavailable".
+        if len(citations) == 1 and any(c.source in {"django_api", "accused_records", "victim_records", "case_search", "case_summary"} for c in citations):
+            required = 1
+            
         return len(citations) >= required and bool(evidence_text.strip())
 
     def confidence_level(self, citations: list[Citation], intent: str) -> str:
         required = self.required_citations_for_intent(intent)
+        if len(citations) == 1 and any(c.source in {"django_api", "accused_records", "victim_records", "case_search", "case_summary"} for c in citations):
+            required = 1
         count = len(citations)
         source_count = len(self.source_breakdown(citations))
 
