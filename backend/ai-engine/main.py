@@ -1,4 +1,7 @@
 from __future__ import annotations
+import socket
+if not hasattr(socket, 'EAI_ADDRFAMILY'):
+    socket.EAI_ADDRFAMILY = getattr(socket, 'EAI_FAMILY', 2)
 
 from contextlib import asynccontextmanager
 

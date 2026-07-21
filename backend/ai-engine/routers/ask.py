@@ -1,5 +1,16 @@
 from __future__ import annotations
 
+"""
+VigilX AI Engine - Core Inference & Agent Orchestration Module
+Maps to Project Implementation Phases:
+- Phase 6: AI-Driven Recommendation System (Next Best Action)
+- Phase 9: Predictive Crime Forecasting (via LangGraph intent routing)
+- Phase 10: Explainable AI & Audit Logging (Features 10.1 to 10.8)
+
+Responsible for managing the LangGraph state machine, intent routing, and sending
+audit logs securely back to the Django REST framework.
+"""
+
 from fastapi import APIRouter, Header, HTTPException, status, BackgroundTasks
 import httpx
 
@@ -78,7 +89,7 @@ async def ai_feedback(query_id: str, rating: int, comments: str = ""):
             success=True,
             message="Feedback received successfully",
             data={"query_id": query_id, "rating": rating},
-            metadata=None,
+            metadata={},
             citations=[],
             errors=[]
         )

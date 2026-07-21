@@ -91,6 +91,9 @@ class AutomatedAlertsView(APIView):
             "message": "Alert dispatched to assigned officers successfully."
         })
 
+    def get(self, request):
+        return self.post(request)
+
 class ForensicIntegrationView(APIView):
     """
     7.8 Integration with Forensic/CID Systems

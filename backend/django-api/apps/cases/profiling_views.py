@@ -147,7 +147,8 @@ class MOTrackingView(APIView):
             accused = Accused.objects.get(id=accused_id)
             # Find dominant MO for this offender
             from django.db.models import Count
-            mo_counts = accused.firs.values('crime_type').annotate(count=Count('id')).order_by('-count')
+            from apps.cases.models import FIR
+            mo_counts = FIR.objects.filter(accused=accused).values('crime_type').annotate(count=Count('id')).order_by('-count')
             
             return Response({
                 "status": "success",

@@ -71,6 +71,9 @@ class AMLWorkflowView(APIView):
             "message": f"Transaction {txn_id} successfully reported to FIU AML system."
         })
 
+    def get(self, request, txn_id):
+        return self.post(request, txn_id)
+
 class CrossBorderTracingView(APIView):
     """
     8.5 Cross-Border Tracing

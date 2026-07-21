@@ -102,6 +102,9 @@ class ModelRetrainingView(APIView):
             "message": "Forecasting models queued for nightly retraining on latest FIR data."
         })
 
+    def get(self, request):
+        return self.post(request)
+
 class EventDrivenForecastingView(APIView):
     """
     9.7 Event-Driven Forecasting

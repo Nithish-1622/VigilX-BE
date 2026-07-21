@@ -28,16 +28,16 @@ from apps.cases.forecasting_views import HotspotPredictionView, GangActivityAler
 from apps.cases.xai_views import ReasoningVisualizationView, ModelTransparencyView, ExplainableRiskView, EthicalGuardrailsView
 
 urlpatterns = [
+    # Phase 2 Management APIs (Must be before router to avoid being caught as PK)
+    path('cases/bulk-upload/', BulkUploadView.as_view(), name='api_bulk_upload'),
+    path('cases/<str:fir_id>/folder/', CaseFolderView.as_view(), name='api_case_folder'),
+
     # Include default router URLs
     path('', include(router.urls)),
 
     # Analytics / Suggest API
     path('suggest/', AutoSuggestView.as_view(), name='api_autosuggest'),
     path('analytics/entity-resolution/', EntityResolutionView.as_view(), name='api_entity_resolution'),
-    
-    # Phase 2 Management APIs
-    path('cases/<str:fir_id>/folder/', CaseFolderView.as_view(), name='api_case_folder'),
-    path('cases/bulk-upload/', BulkUploadView.as_view(), name='api_bulk_upload'),
     
     # Phase 4 Analytics APIs
     path('analytics/trends/', SpatioTemporalTrendView.as_view(), name='api_trends'),
@@ -109,5 +109,5 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='auth_logout'),
 
     # Case Report Export (PDF Generation)
-    path('cases/<uuid:pk>/report/', CaseReportView.as_view(), name='case_pdf_report'),
+    path('cases/<int:pk>/report/', CaseReportView.as_view(), name='case_pdf_report'),
 ]

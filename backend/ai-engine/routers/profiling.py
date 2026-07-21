@@ -1,3 +1,11 @@
+"""
+VigilX AI Engine - Offender Profiling Module
+Maps to Project Implementation Phase:
+- Phase 5: Automated Offender Profiling & Behavioral Analysis (Features 5.1 to 5.7)
+
+Responsible for generating psychological/behavioral profiles from unstructured data,
+assessing flight risk, and estimating recidivism probability.
+"""
 from fastapi import APIRouter, HTTPException
 from schemas.common import StandardResponse
 from utils.logging import get_logger
