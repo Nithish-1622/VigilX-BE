@@ -41,8 +41,7 @@ class RestClient:
         headers = dict(invocation.context_headers)
         if invocation.auth_header:
             headers["Authorization"] = invocation.auth_header
-        elif settings.downstream_service_token:
-            headers["Authorization"] = f"Bearer {settings.downstream_service_token}"
+
         headers.setdefault("Accept", "application/json")
 
         data = self._build_body(definition, invocation)
