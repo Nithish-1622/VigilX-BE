@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
-from apps.cases.models import FIR, Victim, Accused, ClueEntity
+from .models import FIR, Victim, Accused, ClueEntity
 from api.serializers.cases import (
     FIRSerializer, FIRDetailSerializer, 
     VictimSerializer, AccusedSerializer, ClueEntitySerializer
@@ -17,7 +17,6 @@ class FIRViewSet(viewsets.ModelViewSet):
     Supports robust search (on FIR number and description) and filters.
     """
     permission_classes = [IsAuthenticated, IsCaseWriteAuthorized]
-
     def get_serializer_class(self):
         return FIRDetailSerializer
 
@@ -31,6 +30,7 @@ class FIRViewSet(viewsets.ModelViewSet):
         date_start = self.request.query_params.get('date_start')
         date_end = self.request.query_params.get('date_end')
         search_query = self.request.query_params.get('search')
+        fir_id_val = self.request.query_params.get('fir_id')
         
         # Apply filters programmatically
         if status_val:
@@ -43,6 +43,17 @@ class FIRViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(incident_date_time__gte=date_start)
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
+        if fir_id_val:
+            import re
+            digit_groups = re.findall(r'\d+', fir_id_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(id=int(fir_id_val))
+                except ValueError:
+                    pass
         if search_query:
             q_objects = Q()
             stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
@@ -94,16 +105,43 @@ class VictimViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Victim.objects.all().order_by('-id')
+
+        name_val = self.request.query_params.get('name')
+        fir_val = self.request.query_params.get('fir') or self.request.query_params.get('fir_id')
         search_query = self.request.query_params.get('search')
+
+        if name_val:
+            queryset = queryset.filter(name__icontains=name_val)
+
+        if fir_val:
+            import re
+            digit_groups = re.findall(r'\d+', fir_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(fir_id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(fir_id=int(fir_val))
+                except ValueError:
+                    pass
+
         if search_query:
-            from django.db.models import Q
             q_objects = Q()
-            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            stop_words = {
+                'give', 'details', 'about', 'what', 'who', 'show',
+                'tell', 'find', 'search', 'suspect', 'accused',
+                'victim', 'case', 'fir', 'number', 'the',
+                'and', 'for', 'with', 'from', 'this', 'that'
+            }
+
             for word in search_query.split():
-                if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= Q(name__icontains=word)
+                clean_word = re.sub(r'[^\w]', '', word)
+                if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
+                    q_objects &= Q(name__icontains=clean_word)
+
             if q_objects:
                 queryset = queryset.filter(q_objects)
+
         return queryset
 
 class AccusedViewSet(viewsets.ModelViewSet):
@@ -117,18 +155,44 @@ class AccusedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Accused.objects.all().order_by('-id')
+
+        name_val = self.request.query_params.get('name')
+        fir_val = self.request.query_params.get('fir') or self.request.query_params.get('fir_id')
         search_query = self.request.query_params.get('search')
+
+        if name_val:
+            queryset = queryset.filter(name__icontains=name_val)
+
+        if fir_val:
+            import re
+            digit_groups = re.findall(r'\d+', fir_val)
+            if digit_groups:
+                extracted_id = int(digit_groups[-1])
+                queryset = queryset.filter(fir_id=extracted_id)
+            else:
+                try:
+                    queryset = queryset.filter(fir_id=int(fir_val))
+                except ValueError:
+                    pass
+
         if search_query:
-            from django.db.models import Q
             q_objects = Q()
-            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            stop_words = {
+                'give', 'details', 'about', 'what', 'who', 'show',
+                'tell', 'find', 'search', 'suspect', 'accused',
+                'victim', 'case', 'fir', 'number', 'the',
+                'and', 'for', 'with', 'from', 'this', 'that'
+            }
+
             for word in search_query.split():
-                if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= Q(name__icontains=word)
+                clean_word = re.sub(r'[^\w]', '', word)
+                if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
+                    q_objects &= Q(name__icontains=clean_word)
+
             if q_objects:
                 queryset = queryset.filter(q_objects)
-        return queryset
 
+        return queryset
 class ClueEntityViewSet(viewsets.ModelViewSet):
     """
     ViewSet to manage case entities (phone numbers, vehicles, bank accounts).
@@ -170,3 +234,5 @@ class ClueEntityViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_200_OK)
             
         return super().list(request, *args, **kwargs)
+
+# Refreshed import path structures and hosts v3

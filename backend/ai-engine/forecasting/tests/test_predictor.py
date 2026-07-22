@@ -35,7 +35,7 @@ def test_predict_next_month_volume_insufficient_data(mock_graph_manager, forecas
 
 @patch('forecasting.predictor.graph_manager')
 def test_predict_next_month_volume_db_error(mock_graph_manager, forecaster):
-    from neo4j.exceptions import GraphQueryError
+    from db_neo4j.exceptions import GraphQueryError
     mock_graph_manager.execute_read_query.side_effect = GraphQueryError("Timeout")
     
     with pytest.raises(ForecastingError):

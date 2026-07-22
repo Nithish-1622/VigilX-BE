@@ -24,8 +24,7 @@ class ApiClient:
         headers: dict[str, str] = {}
         if auth_header:
             headers["Authorization"] = auth_header
-        elif settings.downstream_service_token:
-            headers["Authorization"] = f"Bearer {settings.downstream_service_token}"
+
         if context_headers:
             headers.update(context_headers)
 

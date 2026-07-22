@@ -32,7 +32,7 @@ def test_recommend_suspects_invalid_case(mock_graph_manager, engine):
 
 @patch('recommendation.engine.graph_manager')
 def test_recommend_suspects_db_error(mock_graph_manager, engine):
-    from neo4j.exceptions import GraphQueryError
+    from db_neo4j.exceptions import GraphQueryError
     mock_graph_manager.execute_read_query.side_effect = GraphQueryError("Syntax error")
     
     with pytest.raises(RecommendationError):

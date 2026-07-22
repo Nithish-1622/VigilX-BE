@@ -15,9 +15,9 @@ class Settings:
     app_version: str = os.getenv("AI_ENGINE_APP_VERSION", "0.1.0")
     log_level: str = os.getenv("AI_ENGINE_LOG_LEVEL", "INFO")
 
-    llm_provider: str = os.getenv("AI_ENGINE_LLM_PROVIDER", "ollama")
-    llm_model: str = os.getenv("AI_ENGINE_LLM_MODEL", "qwen3")
-    llm_base_url: str = os.getenv("AI_ENGINE_LLM_BASE_URL", "http://localhost:11434")
+    llm_provider: str = os.getenv("AI_ENGINE_LLM_PROVIDER", "groq")
+    llm_model: str = os.getenv("AI_ENGINE_LLM_MODEL", "llama-3.1-8b-instant")
+    llm_base_url: str = os.getenv("AI_ENGINE_LLM_BASE_URL", "https://api.groq.com/openai/v1")
     llm_api_key: str = os.getenv("AI_ENGINE_LLM_API_KEY", "")
 
     api_gateway_base_url: str = os.getenv("AI_ENGINE_API_GATEWAY_BASE_URL", "")
@@ -26,7 +26,7 @@ class Settings:
         if os.getenv("AI_ENGINE_API_GATEWAY_TIMEOUT_SECONDS", "").strip()
         else None
     )
-    downstream_service_token: str = os.getenv("AI_ENGINE_DOWNSTREAM_SERVICE_TOKEN", "")
+
 
     rest_api_base_url: str = os.getenv("AI_ENGINE_REST_BASE_URL", "")
     rest_api_timeout_seconds: int | None = (

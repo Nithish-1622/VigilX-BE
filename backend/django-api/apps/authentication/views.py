@@ -24,8 +24,17 @@ class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        # Client discards the token. Returns standard success envelope.
-        return Response({
-            "status": "success",
-            "message": "Successfully logged out."
-        }, status=status.HTTP_200_OK)
+        try:
+            refresh_token = request.data.get("refresh")
+            from rest_framework_simplejwt.tokens import RefreshToken
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({
+                "status": "success",
+                "message": "Successfully logged out."
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "message": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

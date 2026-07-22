@@ -93,8 +93,8 @@ class CaseReportView(APIView):
                 Paragraph("Officer Assigned:", label_style), Paragraph(f"{officer_name} (Badge: {badge})", normal_style)
             ],
             [
-                Paragraph("Incident Date:", label_style), Paragraph(fir.incident_date_time.strftime('%Y-%m-%d %H:%M'), normal_style),
-                Paragraph("Reported Date:", label_style), Paragraph(fir.reported_date_time.strftime('%Y-%m-%d %H:%M'), normal_style)
+                Paragraph("Incident Date:", label_style), Paragraph(fir.incident_date_time.strftime('%Y-%m-%d %H:%M') if fir.incident_date_time else 'N/A', normal_style),
+                Paragraph("Reported Date:", label_style), Paragraph(fir.reported_date_time.strftime('%Y-%m-%d %H:%M') if fir.reported_date_time else 'N/A', normal_style)
             ],
             [
                 Paragraph("Location:", label_style), Paragraph(fir.location, normal_style),

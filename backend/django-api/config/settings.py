@@ -16,7 +16,7 @@ load_dotenv(BASE_DIR.parent.parent / '.env')
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1")
+allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.strip()]
 
 # Application definition
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     
     # Third party packages
     "rest_framework",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     
     # Namespaced Apps
@@ -78,9 +79,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database Configuration (Falls back to SQLite if PostgreSQL variables are not defined)
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME") or os.getenv("POSTGRES_DB")
+DB_USER = os.getenv("DB_USER") or os.getenv("POSTGRES_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD") or os.getenv("POSTGRES_PASSWORD")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
@@ -93,8 +94,14 @@ if DB_NAME and DB_USER and DB_PASSWORD:
             "PASSWORD": DB_PASSWORD,
             "HOST": DB_HOST,
             "PORT": DB_PORT,
+            "OPTIONS": {
+                "sslmode": "require",
+            }
         }
     }
+    db_endpoint = os.getenv("DB_ENDPOINT")
+    if db_endpoint:
+        DATABASES["default"]["OPTIONS"]["options"] = f"endpoint={db_endpoint}"
 else:
     DATABASES = {
         "default": {
@@ -149,7 +156,9 @@ CORS_ALLOW_CREDENTIALS = True
 # Django REST Framework Settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.authentication.ServiceTokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",

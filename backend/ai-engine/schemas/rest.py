@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class RestCapability(StrEnum):
+class RestCapability(str, Enum):
     CRIME_RECORDS = "crime_records"
     FIR_RECORDS = "fir_records"
     ACCUSED_RECORDS = "accused_records"
@@ -17,7 +17,7 @@ class RestCapability(StrEnum):
     CASE_SUMMARY = "case_summary"
 
 
-class RestMethod(StrEnum):
+class RestMethod(str, Enum):
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
