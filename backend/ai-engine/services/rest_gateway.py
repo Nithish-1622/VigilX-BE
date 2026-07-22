@@ -29,12 +29,8 @@ class DjangoRestGateway:
                 error=f"endpoint_not_configured:{query.capability.value}",
             )
 
-        # Always use the service token for internal API communication
-        token = settings.downstream_service_token
         headers = context_headers.copy() if context_headers else {}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        elif auth_header:
+        if auth_header:
             headers["Authorization"] = auth_header
 
         invocation = self._builder.build(

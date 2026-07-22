@@ -26,7 +26,7 @@ class Settings:
         if os.getenv("AI_ENGINE_API_GATEWAY_TIMEOUT_SECONDS", "").strip()
         else None
     )
-    downstream_service_token: str = os.getenv("AI_ENGINE_DOWNSTREAM_SERVICE_TOKEN", "")
+
 
     rest_api_base_url: str = os.getenv("AI_ENGINE_REST_BASE_URL", "")
     rest_api_timeout_seconds: int | None = (
