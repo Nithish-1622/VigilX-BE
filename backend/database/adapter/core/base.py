@@ -133,8 +133,32 @@ class BaseConnector(ABC):
         """Alias for disconnect to support context managers."""
         pass
         
+    async def sync_metadata(self) -> None:
+        """
+        Discovers metadata and profiles the source, then persists it to Postgres
+        so LLMs and other services can easily access the latest source context.
+        """
+        from ..metadata.store import metadata_store
+        
+        try:
+            metadata = await self.discover_metadata()
+            profile = await self.profile()
+            source_type = metadata.get("source_type", self.__class__.__name__)
+            await metadata_store.save_metadata(
+                source_uri=self.connection_string,
+                source_type=source_type,
+                metadata=metadata,
+                profile=profile
+            )
+        except Exception as e:
+            with open("C:/Users/ragha/.gemini/antigravity-ide/brain/b21f1eda-8362-426e-a6c5-c882e9d57c07/scratch/sync_error.txt", "w") as f:
+                f.write(f"Sync metadata failed: {str(e)}\n")
+            # We log but do not raise, so it doesn't break core connector flows
+            pass
+
     async def __aenter__(self):
         await self.connect()
+        await self.sync_metadata()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):

@@ -23,6 +23,9 @@ class AdapterSettings(BaseSettings):
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     ENABLE_METRICS: bool = os.getenv("ENABLE_METRICS", "True").lower() in ("true", "1", "yes")
 
+    # Metadata Storage
+    POSTGRES_METADATA_URL: str = os.getenv("POSTGRES_METADATA_URL", os.getenv("DATABASE_URL", ""))
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

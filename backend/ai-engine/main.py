@@ -57,13 +57,17 @@ async def health() -> dict[str, str]:
 
 @app.get("/adapter-test")
 async def test_adapter() -> dict[str, Any]:
+    # Test triggering the metadata sync!
+    db_url = os.getenv("DATABASE_URL", "sqlite:///test.db")
+    
+    # Actually instantiate a connector and connect to trigger __aenter__ and sync_metadata
+    async with ConnectorRegistry.create_connector(db_url, table_name="auth_user") as connector:
+        # Just connecting triggers the metadata sync to Postgres!
+        metadata = await connector.discover_metadata()
+
     return {
         "status": "success",
+        "message": "Adapter successfully connected and metadata synced to Postgres!",
+        "detected_metadata": metadata,
         "registered_connectors": list(ConnectorRegistry.list_connectors().keys()),
-        "test_detections": {
-            "postgres://user:pass@localhost/db": SourceDetector.detect_source_type("postgres://user:pass@localhost/db"),
-            "data.pdf": SourceDetector.detect_source_type("data.pdf"),
-            "data.csv": SourceDetector.detect_source_type("data.csv"),
-            "mongodb://localhost:27017": SourceDetector.detect_source_type("mongodb://localhost:27017")
-        }
     }

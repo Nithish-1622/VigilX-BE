@@ -238,12 +238,29 @@ class AIOrchestrator:
         structured_query = state.get("structured_query")
         auth_header = state.get("auth_header")
         context_headers = state.get("context_headers", {})
+        # -----------------------------------------------------------------
+        # Automatic metadata persistence for the universal adapter
+        # -----------------------------------------------------------------
+        import os
+        from database.adapter import ConnectorRegistry
+        metadata_url = os.getenv("POSTGRES_METADATA_URL") or os.getenv("DATABASE_URL")
+        if metadata_url:
+            try:
+                async with ConnectorRegistry.create_connector(
+                    connection_string=metadata_url,
+                    table_name="metadata_sync"
+                ) as meta_connector:
+                    await meta_connector.sync_metadata()
+            except Exception as e:
+                with open("C:/Users/ragha/.gemini/antigravity-ide/brain/b21f1eda-8362-426e-a6c5-c882e9d57c07/scratch/sync_error.txt", "a") as f:
+                    f.write(f"create_connector failed: {str(e)}\n")
+                logger.warning("Metadata sync failed for %s: %s", metadata_url, e)
+        # Execute SQL plan using the universal adapter
         sql_result = await self._sql_agent.execute_plan(
             structured_query,
             auth_header=auth_header,
             context_headers=context_headers,
         )
-
         sql_records = sql_result.records
         sql_citations = self._evidence.records_to_citations(sql_records)
 
