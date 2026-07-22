@@ -267,8 +267,6 @@ class AIOrchestrator:
                 ) as meta_connector:
                     await meta_connector.sync_metadata()
             except Exception as e:
-                with open("C:/Users/ragha/.gemini/antigravity-ide/brain/b21f1eda-8362-426e-a6c5-c882e9d57c07/scratch/sync_error.txt", "a") as f:
-                    f.write(f"create_connector failed: {str(e)}\n")
                 logger.warning("Metadata sync failed for %s: %s", metadata_url, e)
         # Execute SQL plan using the universal adapter
         sql_result = await self._sql_agent.execute_plan(
