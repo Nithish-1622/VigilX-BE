@@ -21,7 +21,7 @@ class SourceDetector:
         if parsed.scheme:
             scheme = parsed.scheme.lower()
             # Handle aliases
-            if scheme == 'postgres':
+            if scheme in ('postgres', 'postgresql'):
                 return 'postgresql'
             if scheme in ('mysql', 'sqlite', 'mongodb', 'neo4j', 'redis', 'elasticsearch'):
                 return scheme
