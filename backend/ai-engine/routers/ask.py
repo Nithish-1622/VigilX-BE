@@ -27,7 +27,7 @@ orchestrator = AIOrchestrator()
 async def log_audit_to_django(req: AskRequest, auth_header: str | None, response_intent: str):
     if not auth_header: return
     try:
-        url = f"{settings.rest_base_url.replace('/api', '')}/api/audit/"
+        url = f"{settings.rest_api_base_url.replace('/api', '')}/api/audit/"
         payload = {
             "action": f"AI_QUERY_{response_intent.upper()}",
             "entity_name": "AI_ENGINE",

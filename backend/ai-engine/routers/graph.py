@@ -69,17 +69,7 @@ async def visualize_graph(fir_id: str = Query(None, description="Filter graph by
     except ImportError:
         raise HTTPException(status_code=500, detail="Neo4j driver not installed")
     except Exception as e:
-        # Graceful fallback if Neo4j is offline
-        mock_nodes = [
-            {"id": "FIR-2026-001", "label": "Case", "properties": {"status": "OPEN", "type": "Theft"}},
-            {"id": "ACC-1001", "label": "Accused", "properties": {"name": "John Doe", "risk": "High"}},
-            {"id": "LOC-NorthSector", "label": "Location", "properties": {"zone": "Sector 4"}}
-        ]
-        mock_edges = [
-            {"source": "FIR-2026-001", "target": "ACC-1001", "type": "HAS_SUSPECT"},
-            {"source": "FIR-2026-001", "target": "LOC-NorthSector", "type": "OCCURRED_AT"}
-        ]
-        return {"status": "success", "data": {"nodes": mock_nodes, "edges": mock_edges}, "warning": f"Neo4j offline. Returning mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/community")
 async def detect_communities():
@@ -108,8 +98,7 @@ async def detect_communities():
         
         return {"status": "success", "data": {"communities": results}}
     except Exception as e:
-        mock = [{"accused_1": "John Doe", "accused_2": "Jane Smith", "shared_case": "FIR-2026-001"}]
-        return {"status": "success", "data": {"communities": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/centrality")
 async def role_centrality():
@@ -137,8 +126,7 @@ async def role_centrality():
         
         return {"status": "success", "data": {"centrality": results}}
     except Exception as e:
-        mock = [{"name": "John Doe", "id": "ACC-1001", "degree_centrality": 8}]
-        return {"status": "success", "data": {"centrality": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/shortest-path")
 async def shortest_path(source_id: str, target_id: str):
@@ -166,8 +154,7 @@ async def shortest_path(source_id: str, target_id: str):
         
         return {"status": "success", "data": {"path": results}}
     except Exception as e:
-        mock = [f"Node({source_id})", "Relationship(KNOWS)", f"Node({target_id})"]
-        return {"status": "success", "data": {"path": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/geography")
 async def geographic_mapping():
@@ -194,8 +181,7 @@ async def geographic_mapping():
         
         return {"status": "success", "data": {"geo_points": results}}
     except Exception as e:
-        mock = [{"case_id": "FIR-2026-001", "lat": 28.7041, "lng": 77.1025, "type": "Theft"}]
-        return {"status": "success", "data": {"geo_points": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/temporal")
 async def temporal_dynamics(year: int = Query(None, description="Filter graph by specific year")):
@@ -222,8 +208,7 @@ async def temporal_dynamics(year: int = Query(None, description="Filter graph by
         
         return {"status": "success", "data": {"temporal_links": results}}
     except Exception as e:
-        mock = [{"case_id": "FIR-2026-001", "suspect": "John Doe", "year": year or 2026}]
-        return {"status": "success", "data": {"temporal_links": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/hidden-links")
 async def hidden_links(suspect_id: str):
@@ -250,8 +235,7 @@ async def hidden_links(suspect_id: str):
         
         return {"status": "success", "data": {"hidden_connections": results}}
     except Exception as e:
-        mock = [{"hidden_link": "Mike Syndicate", "strength": 3}]
-        return {"status": "success", "data": {"hidden_connections": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.post("/query")
 async def interactive_query(cypher: str):
@@ -275,8 +259,7 @@ async def interactive_query(cypher: str):
         
         return {"status": "success", "data": {"results": results}}
     except Exception as e:
-        mock = [f"Mock Result for: {cypher}"]
-        return {"status": "success", "data": {"results": mock}, "warning": f"Neo4j offline. Mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
 
 @router.get("/export")
 async def export_subgraph(fir_id: str):
@@ -301,10 +284,4 @@ async def export_subgraph(fir_id: str):
         
         return {"status": "success", "data": {"export": results}}
     except Exception as e:
-        # Mock subgraph data if Neo4j is offline or errors out
-        mock_data = [
-            {"source": fir_id, "relationship": "INVOLVED_IN", "target": "ACC-1001", "target_type": ["Accused"]},
-            {"source": fir_id, "relationship": "FILED_BY", "target": "COMP-402", "target_type": ["Complainant"]},
-            {"source": fir_id, "relationship": "OCCURRED_AT", "target": "LOC-NorthSector", "target_type": ["Location"]}
-        ]
-        return {"status": "success", "data": {"export": mock_data}, "warning": f"Neo4j offline. Returning mock data. ({str(e)})"}
+        raise HTTPException(status_code=500, detail=f"Neo4j connection error: {str(e)}")
