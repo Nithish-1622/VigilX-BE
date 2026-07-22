@@ -1,7 +1,7 @@
 import os
 from rest_framework import authentication
 from rest_framework import exceptions
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 class ServiceTokenAuthentication(authentication.BaseAuthentication):
     """
@@ -25,7 +25,8 @@ class ServiceTokenAuthentication(authentication.BaseAuthentication):
         
         if expected_token and token == expected_token:
             # Get or create a proxy "AI Engine User"
-            user, _ = User.objects.get_or_create(username='ai_engine_service', defaults={'is_staff': True})
+            User = get_user_model()
+            user, _ = User.objects.get_or_create(username='ai_engine_service', defaults={'is_staff': True, 'is_superuser': True})
             return (user, None)
 
         return None
