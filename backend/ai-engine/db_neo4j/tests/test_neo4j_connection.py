@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import patch, MagicMock
 
-from neo4j.exceptions import GraphConfigurationError, GraphConnectionError
-from neo4j.connection import Neo4jConnectionManager
-from neo4j.health import check_neo4j_health
+from db_neo4j.exceptions import GraphConfigurationError, GraphConnectionError
+from db_neo4j.connection import Neo4jConnectionManager
+from db_neo4j.health import check_neo4j_health
 
 # A valid mock settings object
 class MockSettings:

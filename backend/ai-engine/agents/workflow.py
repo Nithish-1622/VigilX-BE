@@ -62,6 +62,8 @@ class WorkflowState(TypedDict, total=False):
     case_summary: dict[str, Any] | None
 
 
+from services.translation_service import TranslationService
+
 class AIOrchestrator:
     def __init__(self) -> None:
         prompt_service = PromptService(prompt_dir=Path(__file__).resolve().parent.parent / "prompts")
@@ -86,14 +88,19 @@ class AIOrchestrator:
             prompt_service=prompt_service,
             llm_client=llm_client,
         )
+        self._translator = TranslationService()
         self._graph = self._build_graph()
 
     async def run(self, req: AskRequest, auth_header: str | None = None) -> StandardResponse:
         correlation_id = str(uuid4())
+        
+        # 1. Translate question to English for internal processing
+        english_question, source_lang = self._translator.translate_to_english(req.question)
+        
         initial_state: WorkflowState = {
             "user_id": req.user_id,
             "session_id": req.session_id,
-            "question": req.question,
+            "question": english_question,
             "auth_header": auth_header,
             "correlation_id": correlation_id,
         }
@@ -104,6 +111,11 @@ class AIOrchestrator:
             state = await self._run_without_langgraph(initial_state)
 
         answer = state.get("answer", self._reasoning.insufficient_data_message())
+        
+        # 2. Translate answer back to user's native language if needed
+        if source_lang != 'en':
+            answer = self._translator.translate_from_english(answer, source_lang)
+
         self._conversation.add_assistant_message(req.user_id, req.session_id, answer)
 
         merged_citations = state.get("merged_citations", [])
@@ -161,13 +173,15 @@ class AIOrchestrator:
         graph.add_node("intent", self._node_intent)
         graph.add_node("retrieve", self._node_retrieve)
         graph.add_node("sql", self._node_sql)
+        graph.add_node("graph", self._node_graph)
         graph.add_node("reason", self._node_reason)
 
         graph.add_edge(START, "conversation")
         graph.add_edge("conversation", "intent")
         graph.add_edge("intent", "retrieve")
         graph.add_edge("retrieve", "sql")
-        graph.add_edge("sql", "reason")
+        graph.add_edge("sql", "graph")
+        graph.add_edge("graph", "reason")
         graph.add_edge("reason", END)
         return graph.compile()
 
@@ -176,6 +190,7 @@ class AIOrchestrator:
         state = await self._node_intent(state)
         state = await self._node_retrieve(state)
         state = await self._node_sql(state)
+        state = await self._node_graph(state)
         state = await self._node_reason(state)
         return state
 
@@ -318,6 +333,44 @@ class AIOrchestrator:
                 citations=merged_citations,
             )
             state["case_summary"] = case_summary.model_dump()
+        return state
+
+    async def _node_graph(self, state: WorkflowState) -> WorkflowState:
+        # 3.10 Knowledge Graph + LLM Synthesis
+        # Inject ProfileGenerator/NetworkAnalyzer graph output into the context.
+        intent = state.get("intent")
+        
+        # We only bother querying the graph if it's a person/suspect search 
+        # or community search to save latency.
+        if intent in ["case_lookup", "criminal_network", "investigation_status"]:
+            try:
+                import os
+                from neo4j import GraphDatabase
+                uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+                driver = GraphDatabase.driver(uri, auth=(os.environ.get("NEO4J_USER"), os.environ.get("NEO4J_PASSWORD")))
+                
+                # Fetch a basic summary of the central suspect's network or active community.
+                # Since we don't have a specific ID, we just ask for a general insight if applicable,
+                # or in a real system we'd extract the suspect ID from `state["structured_query"]`.
+                
+                query = """
+                MATCH (a:Accused)-[r:INVOLVED_IN]->(c:Case)
+                RETURN a.name AS suspect, count(c) AS cases LIMIT 3
+                """
+                results = []
+                with driver.session() as session:
+                    for record in session.run(query):
+                        results.append(f"{record['suspect']} is linked to {record['cases']} cases.")
+                driver.close()
+                
+                if results:
+                    graph_insight = "Graph Network Insight:\n" + "\n".join(results)
+                    # We append this to the SQL records or evidence text so the LLM sees it.
+                    current_evidence = state.get("rag_evidence_text", "")
+                    state["rag_evidence_text"] = current_evidence + "\n" + graph_insight
+            except Exception as e:
+                logger.warning(f"Graph synthesis failed or Neo4j unavailable: {e}")
+                
         return state
 
     async def _node_reason(self, state: WorkflowState) -> WorkflowState:

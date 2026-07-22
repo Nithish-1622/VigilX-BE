@@ -43,15 +43,18 @@ class SQLAgentPlanner:
         prompt = f"""
         Extract query filters from the user question for our REST API.
         Allowed filter fields:
-        - "name": Actual person's proper name (e.g. "Rajesh Kumar", "Priya"). Do NOT extract generic role words like "suspect", "accused", or "victim" as names.
-        - "fir_id": Case reference or FIR number. E.g., "FIR-2026-101", "FIR-123".
+        - "name": Actual person's proper name (e.g. "Rajesh Kumar"). Do NOT extract generic role words.
+        - "fir_id": Case reference or FIR number. E.g., "FIR-2026-101".
         - "crime_type": Type of crime (must be uppercase, e.g. "ROBBERY", "THEFT", "BURGLARY").
-        - "fir": FIR reference.
+        - "gender": The gender of the victim or accused (e.g. "MALE", "FEMALE").
+        - "age_limit": Any age restriction mentioned (e.g. "under 18", "above 60").
+        - "year": The specific year mentioned (e.g. "2025").
+        - "location": Any neighborhood or district mentioned.
         
         Question: "{question}"
         
         Return ONLY a raw JSON object containing these filters (empty if none found). No conversational filler or formatting blocks.
-        Example: {{"name": "Rajesh Kumar"}}
+        Example: {{"gender": "FEMALE", "age_limit": "under 18", "year": "2025", "crime_type": "THEFT"}}
         """
         try:
             res = await self._llm_client.generate(prompt)

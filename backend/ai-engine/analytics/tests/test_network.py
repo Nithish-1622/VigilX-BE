@@ -44,7 +44,7 @@ def test_find_syndicates_success(mock_graph_manager, analyzer):
 @patch('analytics.network.graph_manager')
 def test_query_execution_error(mock_graph_manager, analyzer):
     # Simulating a neo4j query failure
-    from neo4j.exceptions import GraphQueryError
+    from db_neo4j.exceptions import GraphQueryError
     mock_graph_manager.execute_read_query.side_effect = GraphQueryError("Syntax Error")
     
     with pytest.raises(QueryExecutionError):
