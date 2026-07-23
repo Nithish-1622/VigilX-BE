@@ -16,7 +16,7 @@ load_dotenv(BASE_DIR.parent.parent / '.env')
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver")
+allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "*,localhost,127.0.0.1,testserver")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.strip()]
 
 # Application definition
@@ -156,6 +156,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Django REST Framework Settings
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        "api.authentication.DevModeBypassAuthentication",
         "api.authentication.ServiceTokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",

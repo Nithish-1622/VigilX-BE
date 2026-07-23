@@ -22,7 +22,7 @@ if "%choice%"=="1" (
 
 :: Start Django Server in a new window (This will automatically spawn FastAPI on port 8001)
 echo Starting Django API Server on http://127.0.0.1:8000 ...
-start "VigilX Backend Server" cmd /k "cd backend\django-api && ..\..\venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000"
+start "VigilX Backend Server" cmd /k "cd backend\django-api && ..\..\venv\Scripts\python.exe manage.py runserver 0.0.0.0:8000"
 
 echo Both servers have been launched!
 pause
