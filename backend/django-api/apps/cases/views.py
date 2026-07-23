@@ -59,7 +59,7 @@ class FIRViewSet(viewsets.ModelViewSet):
             stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
             for word in search_query.split():
                 if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= (
+                    q_objects |= (
                         Q(fir_number__icontains=word) | 
                         Q(description__icontains=word) |
                         Q(accused__name__icontains=word) |
@@ -137,7 +137,7 @@ class VictimViewSet(viewsets.ModelViewSet):
             for word in search_query.split():
                 clean_word = re.sub(r'[^\w]', '', word)
                 if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
-                    q_objects &= Q(name__icontains=clean_word)
+                    q_objects |= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)
@@ -187,7 +187,7 @@ class AccusedViewSet(viewsets.ModelViewSet):
             for word in search_query.split():
                 clean_word = re.sub(r'[^\w]', '', word)
                 if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
-                    q_objects &= Q(name__icontains=clean_word)
+                    q_objects |= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)

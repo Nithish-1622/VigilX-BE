@@ -174,9 +174,76 @@ def seed_qdrant():
     )
     print("Vector DB seeded successfully!")
 
+def seed_indian_scenario():
+    print("\n--- 4. Seeding Indian Scenario (Additional) ---")
+    # PostgreSQL inserts for Indian scenario
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO CaseMaster (CaseMasterID, CaseNo, BriefFacts)
+            VALUES (103, 'FIR-2026-103', 'Cyber fraud involving fake UPI transaction links sent via WhatsApp in Mumbai.')
+            ON CONFLICT (CaseMasterID) DO UPDATE
+            SET CaseNo = EXCLUDED.CaseNo, BriefFacts = EXCLUDED.BriefFacts;
+        """)
+        cur.execute("""
+            INSERT INTO ComplainantDetails (ComplainantID, CaseMasterID, ComplainantName, AgeYear)
+            VALUES (203, 103, 'Meena Patel', 55)
+            ON CONFLICT (ComplainantID) DO UPDATE
+            SET CaseMasterID = EXCLUDED.CaseMasterID, ComplainantName = EXCLUDED.ComplainantName, AgeYear = EXCLUDED.AgeYear;
+        """)
+        cur.execute("""
+            INSERT INTO Accused (AccusedMasterID, CaseMasterID, AccusedName, AgeYear)
+            VALUES (303, 103, 'Sanjay Kumar', 35)
+            ON CONFLICT (AccusedMasterID) DO UPDATE
+            SET CaseMasterID = EXCLUDED.CaseMasterID, AccusedName = EXCLUDED.AccusedName, AgeYear = EXCLUDED.AgeYear;
+        """)
+        conn.commit()
+        print("PostgreSQL Indian scenario data seeded.")
+    except Exception as e:
+        print(f"Error seeding Indian scenario Postgres data: {e}")
+        conn.rollback()
+    finally:
+        cur.close()
+        conn.close()
+
+    # Neo4j inserts for Indian scenario
+    driver = GraphDatabase.driver(os.getenv("NEO4J_URI"), auth=(os.getenv("NEO4J_USER", "neo4j"), os.getenv("NEO4J_PASSWORD")))
+    cypher = """
+        MERGE (c:Case {id: 'CASE_103'})
+        SET c.case_number = 'FIR-2026-103', c.status = 'OPEN'
+        MERGE (comp:Person {id: 'COMP_203'})
+        SET comp.name = 'Meena Patel', comp.age_group = '55'
+        MERGE (acc:Person {id: 'ACC_303'})
+        SET acc.name = 'Sanjay Kumar', acc.age_group = '35'
+        MERGE (comp)-[:FILED_BY]->(c)
+        MERGE (acc)-[:ACCUSED_IN]->(c)
+    """
+    driver.execute_query(cypher)
+    driver.close()
+    print("Neo4j Indian scenario data seeded.")
+
+    # Qdrant vector for Indian scenario
+    client = QdrantClient(url=os.getenv("QDRANT_HOST"), api_key=os.getenv("QDRANT_API_KEY"))
+    text = "Cyber fraud involving fake UPI transaction links sent via WhatsApp in Mumbai."
+    embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    vector = list(embedding_model.embed([text]))[0]
+    client.upsert(
+        collection_name="crime_cases",
+        points=[
+            PointStruct(
+                id=103,
+                vector=vector.tolist(),
+                payload={"case_id": "CASE_103", "brief_facts": text}
+            )
+        ]
+    )
+    print("Qdrant Indian scenario vector seeded.")
+
 if __name__ == "__main__":
     print("Starting Multi-DB Seeding Process...")
     seed_postgres()
     seed_neo4j()
     seed_qdrant()
-    print("\nALL DATABASES SUCCESSFULLY SEEDED WITH MOCK DATA!")
+    seed_indian_scenario()
+    print("\nALL DATABASES SUCCESSFULLY SEEDED WITH MOCK DATA INCLUDING INDIAN SCENARIO!\n")
