@@ -1,6 +1,9 @@
 import os
+# pyrefly: ignore [missing-import]
 from rest_framework import authentication
+# pyrefly: ignore [missing-import]
 from rest_framework import exceptions
+# pyrefly: ignore [missing-import]
 from django.contrib.auth import get_user_model
 
 class ServiceTokenAuthentication(authentication.BaseAuthentication):
@@ -31,10 +34,15 @@ class ServiceTokenAuthentication(authentication.BaseAuthentication):
 
         return None
 
-class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
+class DevModeBypassAuthentication(authentication.BaseAuthentication):
     """
-    Session authentication without CSRF checks.
-    Useful for APIs that rely on Session Auth without CSRF headers.
+    Bypasses authentication during testing if DEV_MODE=TRUE.
     """
-    def enforce_csrf(self, request):
-        return  # To not perform the csrf check
+    def authenticate(self, request):
+        if os.getenv("DEV_MODE", "FALSE").upper() == "TRUE":
+            User = get_user_model()
+            user = User.objects.filter(is_superuser=True).first()
+            if not user:
+                user, _ = User.objects.get_or_create(username='dev_admin', defaults={'is_staff': True, 'is_superuser': True})
+            return (user, None)
+        return None
