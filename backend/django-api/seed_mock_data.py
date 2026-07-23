@@ -5,7 +5,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from apps.cases.models import FIR, Accused, BankAccount, Transaction
+from apps.cases.models import FIR, Accused, BankAccount, Transaction, Victim, Complainant, ClueEntity
 from django.utils import timezone
 from datetime import timedelta
 import uuid
