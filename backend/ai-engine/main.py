@@ -6,6 +6,7 @@ from typing import Any
 
 from contextlib import asynccontextmanager
 
+# pyrefly: ignore [missing-import]
 from fastapi import FastAPI
 
 from routers.ask import router as ask_router
@@ -33,6 +34,7 @@ async def lifespan(_: FastAPI):
 	logger.info("Stopping %s", settings.app_name)
 
 
+# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
@@ -56,12 +58,17 @@ from routers.history import router as history_router
 from routers.documents import router as documents_router
 from routers.graph import router as graph_router
 from routers.profiling import router as profiling_router
+# V2 Multi-Agent Investigation Intelligence Platform
+# V1 /ai/ask is PRESERVED — V2 adds /ai/v2/ask (temporary dev namespace)
+from routers.ask_v2 import router as ask_v2_router
+
 app.include_router(ask_router)
 app.include_router(voice_router)
 app.include_router(history_router)
 app.include_router(documents_router)
 app.include_router(graph_router)
 app.include_router(profiling_router)
+app.include_router(ask_v2_router)
 
 
 @app.get("/")

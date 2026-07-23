@@ -1,6 +1,9 @@
 import os
+# pyrefly: ignore [missing-import]
 from rest_framework import authentication
+# pyrefly: ignore [missing-import]
 from rest_framework import exceptions
+# pyrefly: ignore [missing-import]
 from django.contrib.auth import get_user_model
 
 class ServiceTokenAuthentication(authentication.BaseAuthentication):
@@ -29,4 +32,17 @@ class ServiceTokenAuthentication(authentication.BaseAuthentication):
             user, _ = User.objects.get_or_create(username='ai_engine_service', defaults={'is_staff': True, 'is_superuser': True})
             return (user, None)
 
+        return None
+
+class DevModeBypassAuthentication(authentication.BaseAuthentication):
+    """
+    Bypasses authentication during testing if DEV_MODE=TRUE.
+    """
+    def authenticate(self, request):
+        if os.getenv("DEV_MODE", "FALSE").upper() == "TRUE":
+            User = get_user_model()
+            user = User.objects.filter(is_superuser=True).first()
+            if not user:
+                user, _ = User.objects.get_or_create(username='dev_admin', defaults={'is_staff': True, 'is_superuser': True})
+            return (user, None)
         return None
