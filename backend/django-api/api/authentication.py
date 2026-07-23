@@ -30,3 +30,11 @@ class ServiceTokenAuthentication(authentication.BaseAuthentication):
             return (user, None)
 
         return None
+
+class CsrfExemptSessionAuthentication(authentication.SessionAuthentication):
+    """
+    Session authentication without CSRF checks.
+    Useful for APIs that rely on Session Auth without CSRF headers.
+    """
+    def enforce_csrf(self, request):
+        return  # To not perform the csrf check
