@@ -37,7 +37,8 @@ endpoints = [
 
 for path, desc in endpoints:
     try:
-        resp = requests.get(f"{DJANGO_BASE}{path}", timeout=5)
+        headers = {"Authorization": f"Bearer {os.getenv('AI_ENGINE_DOWNSTREAM_SERVICE_TOKEN')}"}
+        resp = requests.get(f"{DJANGO_BASE}{path}", headers=headers, timeout=5)
         data = resp.json()
         count = 0
         if isinstance(data, dict):

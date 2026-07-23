@@ -158,7 +158,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "api.authentication.DevModeBypassAuthentication",
         "api.authentication.ServiceTokenAuthentication",
-        "api.authentication.CsrfExemptSessionAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
