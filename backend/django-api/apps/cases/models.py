@@ -30,7 +30,7 @@ class FIR(models.Model):
     fir_number = models.CharField(max_length=100, db_column='crimeno', null=True, blank=True)
     description = models.TextField(db_column='brieffacts', null=True, blank=True)
     incident_date_time = models.DateTimeField(db_column='incidentfromdate', null=True, blank=True)
-    reported_date_time = models.DateTimeField(db_column='crimeregistereddate', null=True, blank=True)
+    reported_date_time = models.DateField(db_column='crimeregistereddate', null=True, blank=True)
 
     crime_type = models.CharField(max_length=50, db_column='crime_type', choices=CrimeType.choices, default=CrimeType.THEFT)
     status = models.CharField(max_length=50, db_column='status', choices=CaseStatus.choices, default=CaseStatus.PENDING)
