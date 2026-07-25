@@ -92,48 +92,54 @@ class CatalystAuthentication(authentication.BaseAuthentication):
     Primary authentication class for production.
 
     Flow:
-      1. Call CatalystAuthService.verify_request() to validate the Catalyst
-         session cookie / Authorization header against Zoho's servers.
-      2. Call UserRepository.get_or_create_from_catalyst() to mirror the
-         authenticated user into the local Django DB.
-      3. Update the last_login_at timestamp.
-      4. Attach the local User object to request.user.
-
-    Supports Email/Password, Google Sign-In, and Zoho Sign-In transparently —
-    the provider is detected from the Catalyst user dict and stored on the user.
+      1. CatalystAuthService.verify_request() validates the Catalyst session/cookie.
+      2. CatalystUserRepository.get_or_create_from_catalyst() reads/writes the
+         user profile in Zoho Catalyst Cloud SQL (NOT Neon Postgres).
+      3. A lightweight proxy Django User is used ONLY for DRF compatibility.
+         All real user data lives in Catalyst Cloud SQL.
     """
     def authenticate(self, request):
         from apps.authentication.services import CatalystAuthService
-        from apps.users.repository import UserRepository
+        from apps.authentication.catalyst_user_repository import CatalystUserRepository
 
-        # Attempt Catalyst SDK validation
         catalyst_user = CatalystAuthService.verify_request(request)
         if not catalyst_user:
-            return None  # Not a Catalyst-authenticated request — pass to next class
+            return None
 
         try:
-            user, is_new = UserRepository.get_or_create_from_catalyst(catalyst_user)
-            UserRepository.update_last_login(user)
+            # Save / update user profile in Catalyst Cloud SQL
+            profile, is_new = CatalystUserRepository.get_or_create_from_catalyst(
+                catalyst_user, request=request
+            )
+            CatalystUserRepository.update_last_login(
+                profile.get("catalyst_uid", ""), request=request
+            )
+
+            # Build a lightweight Django proxy user for DRF (no DB write to Neon)
+            User = get_user_model()
+            email = profile.get("email", "")
+            proxy_user, _ = User.objects.get_or_create(
+                username=email or profile.get("catalyst_uid", "unknown"),
+                defaults={
+                    "email": email,
+                    "is_active": True,
+                }
+            )
+            # Attach Catalyst Cloud SQL profile to the request user
+            proxy_user.catalyst_profile = profile
+            proxy_user.role = profile.get("role", "INVESTIGATOR")
 
             if is_new:
                 logger.info(
-                    "First login: new user synced to local DB — %s (provider=%s)",
-                    user.email,
-                    user.auth_provider,
+                    "First login: new user created in Catalyst Cloud SQL — %s (role=%s)",
+                    email, profile.get("role"),
                 )
 
-            return (user, None)
+            return (proxy_user, None)
 
-        except ValueError as exc:
-            logger.error("Catalyst auth DB sync failed: %s", exc)
-            raise exceptions.AuthenticationFailed("Could not sync user from Catalyst.")
         except Exception as exc:
-            logger.exception("Unexpected error during Catalyst authentication: %s", exc)
+            logger.exception("CatalystAuthentication error: %s", exc)
             raise exceptions.AuthenticationFailed("Authentication error.")
 
     def authenticate_header(self, request):
-        """
-        Returned in WWW-Authenticate header on 401 responses.
-        Tells the client to use Catalyst Bearer tokens.
-        """
         return 'CatalystAuth realm="VigilX API"'
