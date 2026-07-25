@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 
 class AskRequest(BaseModel):
-    session_id: str = Field(min_length=1, max_length=128)
-    user_id: str = Field(min_length=1, max_length=128)
+    session_id: str = Field(default="session-default", min_length=1, max_length=128)
+    user_id: str = Field(default="officer1", min_length=1, max_length=128)
     question: str = Field(min_length=1, max_length=5000)
 
 
