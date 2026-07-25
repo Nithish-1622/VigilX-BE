@@ -142,16 +142,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS configuration
-CORS_ALLOWED_ORIGINS = [
-    origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
-]
-# Fallback CORS origins for local testing
-if not CORS_ALLOWED_ORIGINS:
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
-
+# Nginx handles strict CORS checking, so internal Django allows all
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Django REST Framework Settings
