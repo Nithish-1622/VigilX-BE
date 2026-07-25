@@ -108,7 +108,7 @@ class GraphIntelligenceAgent:
     def _community_detection(self, driver) -> tuple[list[dict], str]:
         with driver.session() as session:
             result = session.run("""
-                MATCH (a1:Accused)-[:INVOLVED_IN]->(c:Case)<-[:INVOLVED_IN]-(a2:Accused)
+                MATCH (a1:Person {type: 'Accused'})-[:ACCUSED_IN]->(c:Case)<-[:ACCUSED_IN]-(a2:Person {type: 'Accused'})
                 WHERE id(a1) < id(a2)
                 RETURN a1.name AS accused_1, a2.name AS accused_2,
                        c.id AS shared_case, c.crime_type AS crime_type
@@ -121,7 +121,7 @@ class GraphIntelligenceAgent:
     def _centrality(self, driver) -> tuple[list[dict], str]:
         with driver.session() as session:
             result = session.run("""
-                MATCH (a:Accused)-[r]-()
+                MATCH (a:Person {type: 'Accused'})-[r]-()
                 RETURN a.id AS accused_id, a.name AS name, count(r) AS degree_centrality
                 ORDER BY degree_centrality DESC LIMIT 10
             """)
@@ -135,9 +135,9 @@ class GraphIntelligenceAgent:
     def _hidden_links(self, driver, suspect_id: str) -> tuple[list[dict], str]:
         with driver.session() as session:
             result = session.run("""
-                MATCH (a1:Accused {id: $sid})-[:INVOLVED_IN]->(c1:Case)
-                      <-[:INVOLVED_IN]-(a2:Accused)-[:INVOLVED_IN]->(c2:Case)
-                      <-[:INVOLVED_IN]-(a3:Accused)
+                MATCH (a1:Person {type: 'Accused', id: $sid})-[:ACCUSED_IN]->(c1:Case)
+                      <-[:ACCUSED_IN]-(a2:Person {type: 'Accused'})-[:ACCUSED_IN]->(c2:Case)
+                      <-[:ACCUSED_IN]-(a3:Person {type: 'Accused'})
                 WHERE a1 <> a3
                 RETURN a3.name AS hidden_link, a3.id AS hidden_id,
                        count(c2) AS connection_strength

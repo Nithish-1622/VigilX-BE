@@ -369,7 +369,7 @@ class AIOrchestrator:
                 # or in a real system we'd extract the suspect ID from `state["structured_query"]`.
                 
                 query = """
-                MATCH (a:Accused)-[r:INVOLVED_IN]->(c:Case)
+                MATCH (a:Person)-[r:ACCUSED_IN]->(c:Case)
                 RETURN a.name AS suspect, count(c) AS cases LIMIT 3
                 """
                 results = []
@@ -381,8 +381,10 @@ class AIOrchestrator:
                 if results:
                     graph_insight = "Graph Network Insight:\n" + "\n".join(results)
                     # We append this to the SQL records or evidence text so the LLM sees it.
-                    current_evidence = state.get("rag_evidence_text", "")
-                    state["rag_evidence_text"] = current_evidence + "\n" + graph_insight
+                    current_rag = state.get("rag_evidence_text", "")
+                    state["rag_evidence_text"] = current_rag + "\n" + graph_insight
+                    current_merged = state.get("merged_evidence_text", "")
+                    state["merged_evidence_text"] = current_merged + "\n\n" + graph_insight
             except Exception as e:
                 logger.warning(f"Graph synthesis failed or Neo4j unavailable: {e}")
                 

@@ -44,21 +44,32 @@ class FIRViewSet(viewsets.ModelViewSet):
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
         if fir_id_val:
-            import re
-            digit_groups = re.findall(r'\d+', fir_id_val)
-            if digit_groups:
-                extracted_id = int(digit_groups[-1])
-                queryset = queryset.filter(id=extracted_id)
+            # First try exact match on fir_number field
+            fir_qs = queryset.filter(fir_number__iexact=fir_id_val)
+            if fir_qs.exists():
+                queryset = fir_qs
             else:
-                try:
-                    queryset = queryset.filter(id=int(fir_id_val))
-                except ValueError:
-                    pass
-        if search_query:
+                # Fallback: extract numeric ID from FIR reference
+                import re
+                digit_groups = re.findall(r'\d+', fir_id_val)
+                if digit_groups:
+                    extracted_id = int(digit_groups[-1])
+                    queryset = queryset.filter(id=extracted_id)
+                else:
+                    try:
+                        queryset = queryset.filter(id=int(fir_id_val))
+                    except ValueError:
+                        pass
+        if search_query and not fir_id_val:
             q_objects = Q()
-            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that', 'status', 'crime', 'type', 'location', 'date', 'report', 'sections', 'applied', 'list', 'all', 'are', 'has', 'have', 'been', 'their', 'them', 'they', 'any', 'its', 'was', 'were', 'how', 'when', 'where', 'which'}
+            import re as _re
             for word in search_query.split():
+                word = _re.sub(r'[^\w\-]', '', word)  # strip punctuation
                 if len(word) > 2 and word.lower() not in stop_words:
+                    # Skip words that look like FIR numbers (already handled by fir_id filter)
+                    if _re.match(r'^FIR-', word, _re.IGNORECASE):
+                        continue
                     q_objects |= (
                         Q(fir_number__icontains=word) | 
                         Q(description__icontains=word) |

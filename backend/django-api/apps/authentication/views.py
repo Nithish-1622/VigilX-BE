@@ -1,21 +1,43 @@
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.contrib.auth import authenticate, login, logout
 
-class LoginView(TokenObtainPairView):
+class LoginView(APIView):
     """
-    Subclass of simplejwt's TokenObtainPairView to authenticate users 
-    and retrieve JWT access and refresh tokens.
+    Endpoint to authenticate users via username and password without JWT tokens.
     """
     permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return Response({
+                "status": "success",
+                "message": "Successfully logged in."
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "status": "error",
+                "message": "Invalid credentials"
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
-class RefreshView(TokenRefreshView):
+class RefreshView(APIView):
     """
-    Subclass of simplejwt's TokenRefreshView to rotate access tokens.
+    Refresh endpoint (disabled as tokens are removed).
     """
     permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        return Response({
+            "status": "error",
+            "message": "Token refresh is not supported."
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(APIView):
     """
@@ -25,10 +47,7 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            refresh_token = request.data.get("refresh")
-            from rest_framework_simplejwt.tokens import RefreshToken
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            logout(request)
             return Response({
                 "status": "success",
                 "message": "Successfully logged out."
