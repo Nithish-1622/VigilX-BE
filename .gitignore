@@ -37,3 +37,10 @@ FRONTEND_ARCHITECTURE.md*
 
 *.md 
 !Readme.md
+Docker/
+
+
+.catalystignore
+.catalystrc
+app-config.json
+catalyst.json

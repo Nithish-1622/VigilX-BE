@@ -23,15 +23,22 @@ backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if backend_root not in sys.path:
     sys.path.insert(0, backend_root)
 
-from database.adapter.registry.registry import ConnectorRegistry
-from database.adapter.registry.detector import SourceDetector
+# Lazy-load database adapter registry on demand to ensure instant server boot time
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-	logger.info("Starting %s v%s", settings.app_name, settings.app_version)
-	yield
-	logger.info("Stopping %s", settings.app_name)
+    logger.info("Starting %s v%s", settings.app_name, settings.app_version)
+    if os.getenv("DATABASE_URL"):
+        try:
+            import django
+            from django.core.management import call_command
+            call_command("migrate", "--noinput")
+            logger.info("Django database migrations completed successfully.")
+        except Exception as e:
+            logger.warning("Django migration check skipped/failed: %s", e)
+    yield
+    logger.info("Stopping %s", settings.app_name)
 
 
 # pyrefly: ignore [missing-import]
@@ -46,7 +53,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000").split(","),
+    allow_origins=[origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -70,6 +77,23 @@ app.include_router(graph_router)
 app.include_router(profiling_router)
 app.include_router(ask_v2_router)
 
+# Mount Django WSGI Application on /api and /admin for single-process deployment
+from fastapi.middleware.wsgi import WSGIMiddleware
+django_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "django-api"))
+if django_dir not in sys.path:
+    sys.path.insert(0, django_dir)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+try:
+    import django
+    django.setup()
+    from config.wsgi import application as django_app
+    app.mount("/api", WSGIMiddleware(django_app))
+    app.mount("/admin", WSGIMiddleware(django_app))
+    logger.info("Successfully mounted Django REST API on /api and /admin")
+except Exception as e:
+    logger.error("Failed to mount Django app: %s", e)
+
 
 @app.get("/")
 async def root() -> dict[str, str]:
@@ -87,6 +111,7 @@ async def health() -> dict[str, str]:
 
 @app.get("/adapter-test")
 async def test_adapter() -> dict[str, Any]:
+    from database.adapter.registry.registry import ConnectorRegistry
     # Test triggering the metadata sync!
     db_url = os.getenv("DATABASE_URL", "sqlite:///test.db")
     

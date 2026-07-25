@@ -5,13 +5,15 @@ Django settings for config project.
 import os
 from pathlib import Path
 from datetime import timedelta
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables
-load_dotenv(BASE_DIR.parent.parent / '.env')
+# Load environment variables from .env if present (local dev only).
+# override=False ensures Catalyst-injected env vars are never overwritten in production.
+load_dotenv(BASE_DIR.parent.parent / '.env', override=False)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
@@ -31,7 +33,6 @@ INSTALLED_APPS = [
     
     # Third party packages
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     
     # Namespaced Apps
@@ -142,7 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
+    origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
 ]
 # Fallback CORS origins for local testing
 if not CORS_ALLOWED_ORIGINS:
@@ -158,6 +159,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "api.authentication.DevModeBypassAuthentication",
         "api.authentication.ServiceTokenAuthentication",
+        "api.authentication.CatalystAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
@@ -168,15 +170,4 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.middleware.exception.custom_exception_handler",
 }
 
-# Simple JWT Settings
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Bearer",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-}
+
