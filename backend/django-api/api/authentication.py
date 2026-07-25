@@ -46,3 +46,41 @@ class DevModeBypassAuthentication(authentication.BaseAuthentication):
                 user, _ = User.objects.get_or_create(username='dev_admin', defaults={'is_staff': True, 'is_superuser': True})
             return (user, None)
         return None
+
+class CatalystAuthentication(authentication.BaseAuthentication):
+    """
+    Native Zoho Catalyst Authentication. 
+    Reads the incoming request, parses the Zoho Session Cookie (zcsession) or Authorization header,
+    validates it using the zcatalyst-sdk, and returns the authenticated Django User.
+    """
+    def authenticate(self, request):
+        try:
+            import zcatalyst_sdk
+            # zcatalyst_sdk requires the raw WSGI environ request to read headers/cookies
+            app = zcatalyst_sdk.initialize(req=request._request)
+            auth_service = app.authentication()
+            user_details = auth_service.get_current_user()
+            
+            if user_details:
+                # Zoho Catalyst returns email_id, role_details, etc.
+                email = user_details.get('email_id')
+                if not email:
+                    return None
+                    
+                User = get_user_model()
+                # Mirror the Zoho user in the local Django DB for relational foreign keys
+                user, created = User.objects.get_or_create(username=email, defaults={'email': email})
+                
+                # Optionally sync roles
+                role = user_details.get('role_details', {}).get('role_name')
+                if role == 'Admin' and not user.is_superuser:
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.save()
+                    
+                return (user, None)
+        except Exception as e:
+            # If token is missing or invalid, Catalyst SDK throws an exception
+            pass
+            
+        return None

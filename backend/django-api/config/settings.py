@@ -33,7 +33,6 @@ INSTALLED_APPS = [
     
     # Third party packages
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     
     # Namespaced Apps
@@ -160,7 +159,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "api.authentication.DevModeBypassAuthentication",
         "api.authentication.ServiceTokenAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "api.authentication.CatalystAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
@@ -171,15 +170,4 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "api.middleware.exception.custom_exception_handler",
 }
 
-# Simple JWT Settings
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": False,
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("Bearer",),
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-}
+
