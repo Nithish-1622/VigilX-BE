@@ -27,7 +27,7 @@ class SQLAgentPlanner:
             filters["fir"] = fir_match.group(1).upper()
 
         # Look for name patterns (e.g. "is Rajesh Kumar")
-        name_match = re.search(r'\b(?:is|show|suspect|victim|for)\b\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)', question)
+        name_match = re.search(r'\b(?:is|show|suspect|victim|for|of|about|on|name)\b\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)', question)
         if name_match:
             name_val = name_match.group(1).strip()
             # Avoid matching case, role or FIR words as name
@@ -63,7 +63,7 @@ class SQLAgentPlanner:
         Question: "{question}"
         
         Return ONLY a raw JSON object containing these filters (empty {{}} if none found). No conversational filler or formatting blocks.
-        Example: {{"gender": "FEMALE", "age_limit": "under 18", "year": "2025", "crime_type": "THEFT", "status": "UNDER_INVESTIGATION"}}
+        Example: {{"name": "Rajesh Kumar", "gender": "FEMALE", "age_limit": "under 18", "year": "2025", "crime_type": "THEFT", "status": "UNDER_INVESTIGATION"}}
         """
         try:
             res = await self._llm_client.generate(prompt)
@@ -75,8 +75,14 @@ class SQLAgentPlanner:
                     for k, v in llm_filters.items():
                         if v and str(v).strip():
                             # Don't let LLM override regex-extracted fir_id
-                            if k == "fir_id" and k in filters:
-                                continue
+                            if k == "fir_id":
+                                if k in filters:
+                                    continue
+                                # Sanitize LLM hallucinations for fir_id (must contain a digit)
+                                import re as _re
+                                if not _re.search(r'\d', str(v)):
+                                    continue
+
                             # Don't apply crime_type filter on specific FIR lookups
                             if k == "crime_type" and "fir_id" in filters:
                                 continue
@@ -87,12 +93,19 @@ class SQLAgentPlanner:
         # Sanitize name filter to ensure no role words slipped through
         if "name" in filters and filters["name"].lower().strip() in {"suspect", "victim", "accused", "person", "complainant", "officer", "the suspect", "the victim"}:
             del filters["name"]
+            
+        # Sanitize crime_type filter to prevent incorrect roles from being used as crime types
+        if "crime_type" in filters and filters["crime_type"].upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN"}:
+            del filters["crime_type"]
+            
+        # If we have extracted specific filters like name or fir_id, we shouldn't send the full question to the full-text search.
+        query_text = question if not ("name" in filters or "fir_id" in filters) else ""
 
         return StructuredQuery(
             capability=capability,
             intent=intent,
             question=question,
-            query_text=question,
+            query_text=query_text,
             filters=filters,
         )
 

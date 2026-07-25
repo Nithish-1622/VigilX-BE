@@ -29,20 +29,11 @@ VERIFIED EVIDENCE (your ONLY source of truth):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 REQUIRED OUTPUT FORMAT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Write a structured investigative analysis using ONLY the sections relevant to available evidence:
+1. Directly and accurately answer the OFFICER QUESTION in natural language based ONLY on the verified evidence provided.
+2. NEVER output raw JSON, dictionaries, or formatting from the evidence block.
+3. Do NOT output rigid headers like "**Summary**", "**Key Findings**", or "**Evidence Gaps**" unless specifically asked to format it as a report.
+4. Just provide a clear, factual, and concise text answer to the question.
+5. If the evidence does not contain the answer to the specific question asked, you MUST output exactly: "Insufficient evidence to conclude on this point."
 
-**Summary**
-[2-3 sentence factual summary strictly based on evidence]
-
-**Key Findings**
-[Bullet points of verified facts extracted from evidence. Each bullet must cite evidence source.]
-
-**Investigation Status**
-[Current status based on evidence only]
-
-**Evidence Gaps**
-[What specific information is missing or could not be confirmed from the available evidence]
-
-Do NOT include any section if you have no evidence to support it.
 Do NOT speculate. Do NOT invent. Do NOT pad.
 Accuracy is non-negotiable — this response is used by active law enforcement investigators.

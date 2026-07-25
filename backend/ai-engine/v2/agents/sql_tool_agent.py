@@ -45,7 +45,12 @@ class SQLToolAgent:
             if extra_params:
                 for k, v in extra_params.items():
                     if v is not None and str(v).strip():
-                        structured_query.filters[k] = str(v)
+                        val = str(v).strip()
+                        if k in {"search", "query"}:
+                            continue
+                        if k == "crime_type" and val.upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN", "PERSONAL", "PERSONAL_DATA", "AGE"}:
+                            continue
+                        structured_query.filters[k] = val
 
             # Execute via V1 SQLAgentService → DjangoRestGateway
             result = await self._sql_agent.execute_plan(

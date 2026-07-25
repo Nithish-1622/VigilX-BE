@@ -60,6 +60,13 @@ class FIRViewSet(viewsets.ModelViewSet):
                         queryset = queryset.filter(id=int(fir_id_val))
                     except ValueError:
                         pass
+        name_val = self.request.query_params.get('name')
+        if name_val:
+            queryset = queryset.filter(
+                Q(accused__name__icontains=name_val) |
+                Q(victims__name__icontains=name_val) |
+                Q(complainants__name__icontains=name_val)
+            ).distinct()
         if search_query and not fir_id_val:
             q_objects = Q()
             stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that', 'status', 'crime', 'type', 'location', 'date', 'report', 'sections', 'applied', 'list', 'all', 'are', 'has', 'have', 'been', 'their', 'them', 'they', 'any', 'its', 'was', 'were', 'how', 'when', 'where', 'which'}
