@@ -83,6 +83,10 @@ class SQLAgentPlanner:
                                 if not _re.search(r'\d', str(v)):
                                     continue
 
+                            # Prevent LLM from hallucinating full text search filters
+                            if k in {"search", "query"}:
+                                continue
+
                             # Don't apply crime_type filter on specific FIR lookups
                             if k == "crime_type" and "fir_id" in filters:
                                 continue
@@ -113,9 +117,9 @@ class SQLAgentPlanner:
         if intent == "case_lookup":
             return RestCapability.CASE_SEARCH
         if intent == "suspect_query":
-            return RestCapability.ACCUSED_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "victim_query":
-            return RestCapability.VICTIM_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "timeline_query":
             return RestCapability.CASE_SUMMARY
         if intent == "evidence_summary":

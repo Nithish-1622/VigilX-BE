@@ -52,25 +52,30 @@ class Command(BaseCommand):
             self._create_via_catalyst(email, first_name, last_name)
 
     def _list_local_users(self):
-        """List all users in the local Django DB."""
-        self.stdout.write(self.style.SUCCESS("\n-- Local Django DB Users ----------------------------------"))
-        users = User.objects.all().order_by("-date_joined")
-        if not users.exists():
-            self.stdout.write("  No users found.")
-            return
+        """List all users in Catalyst Cloud SQL."""
+        from apps.authentication.catalyst_user_repository import CatalystUserRepository
+        self.stdout.write(self.style.SUCCESS("\n-- Catalyst Cloud SQL User Profiles ----------------------------------"))
+        try:
+            users = CatalystUserRepository.list_all()
+            if not users:
+                self.stdout.write("  No user profiles found in Catalyst Cloud SQL.")
+                return
 
-        for u in users:
-            self.stdout.write(
-                f"  {u.email or u.username:<35} "
-                f"role={u.role:<15} "
-                f"provider={u.auth_provider:<10} "
-                f"catalyst_uid={u.catalyst_user_id or 'N/A'}"
-            )
-        self.stdout.write(f"\n  Total: {users.count()} user(s)")
+            for u in users:
+                prof = CatalystUserRepository.build_profile_dict(u)
+                self.stdout.write(
+                    f"  {prof['email']:<35} "
+                    f"role={prof['role']:<15} "
+                    f"provider={prof['auth_provider']:<10} "
+                    f"catalyst_uid={prof['catalyst_uid'] or 'N/A'}"
+                )
+            self.stdout.write(f"\n  Total: {len(users)} user(s)")
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Failed to query Catalyst Cloud SQL: {e}"))
 
     def _create_local_only(self, email, first_name, last_name, role_name):
-        """Create a user only in the local Django DB (for dev/testing)."""
-        from apps.users.repository import UserRepository
+        """Create a user profile directly in Catalyst Cloud SQL Data Store."""
+        from apps.authentication.catalyst_user_repository import CatalystUserRepository
 
         fake_catalyst_user = {
             "user_id": f"local-test-{email}",
@@ -82,24 +87,25 @@ class Command(BaseCommand):
         }
 
         try:
-            user, created = UserRepository.get_or_create_from_catalyst(fake_catalyst_user)
+            profile, created = CatalystUserRepository.get_or_create_from_catalyst(fake_catalyst_user)
+            p_dict = CatalystUserRepository.build_profile_dict(profile)
             if created:
                 self.stdout.write(self.style.SUCCESS(
-                    f"[CREATED] New user synced to local DB:\n"
-                    f"   Email:    {user.email}\n"
-                    f"   Role:     {user.role}\n"
-                    f"   ID:       {user.id}\n"
-                    f"   Username: {user.username}"
+                    f"[CREATED] New user saved in Catalyst Cloud SQL:\n"
+                    f"   Email:        {p_dict['email']}\n"
+                    f"   Role:         {p_dict['role']}\n"
+                    f"   ROWID:        {p_dict['id']}\n"
+                    f"   Display Name: {p_dict['display_name']}"
                 ))
             else:
                 self.stdout.write(self.style.WARNING(
-                    f"[EXISTS] User already exists in local DB:\n"
-                    f"   Email:    {user.email}\n"
-                    f"   Role:     {user.role}\n"
-                    f"   ID:       {user.id}"
+                    f"[EXISTS] User already exists in Catalyst Cloud SQL:\n"
+                    f"   Email:        {p_dict['email']}\n"
+                    f"   Role:         {p_dict['role']}\n"
+                    f"   ROWID:        {p_dict['id']}"
                 ))
         except Exception as e:
-            raise CommandError(f"Failed to create local user: {e}")
+            raise CommandError(f"Failed to create Catalyst Cloud SQL user: {e}")
 
     def _create_via_catalyst(self, email, first_name, last_name):
         """Create a user in the Catalyst cloud via the zcatalyst-sdk."""
