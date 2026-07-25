@@ -9,6 +9,7 @@ class LoginView(APIView):
     Endpoint to authenticate users via username and password without JWT tokens.
     """
     permission_classes = (AllowAny,)
+    authentication_classes = ()
     
     def post(self, request):
         username = request.data.get("username")

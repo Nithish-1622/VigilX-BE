@@ -24,8 +24,10 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai-engine"])
 orchestrator = AIOrchestrator()
 
-async def log_audit_to_django(req: AskRequest, auth_header: str | None, response_intent: str):
-    if not auth_header: return
+async def log_audit_to_django(req: AskRequest, response_intent: str):
+    import os
+    internal_token = os.getenv("AI_ENGINE_DOWNSTREAM_SERVICE_TOKEN")
+    if not internal_token: return
     try:
         url = f"{settings.rest_api_base_url.replace('/api', '')}/api/audit/"
         payload = {
@@ -35,7 +37,7 @@ async def log_audit_to_django(req: AskRequest, auth_header: str | None, response
             "details": {"question": req.question}
         }
         async with httpx.AsyncClient() as client:
-            await client.post(url, json=payload, headers={"Authorization": auth_header})
+            await client.post(url, json=payload, headers={"Authorization": f"Bearer {internal_token}"})
     except Exception as e:
         logger.warning(f"Failed to log audit to Django: {e}")
 
@@ -51,13 +53,14 @@ async def ask(
 ) -> StandardResponse:
     try:
         res = await orchestrator.run(req, auth_header=authorization)
-        background_tasks.add_task(log_audit_to_django, req, authorization, res.metadata.intent)
+        background_tasks.add_task(log_audit_to_django, req, res.metadata.intent)
         return res
     except ValueError as exc:
         logger.warning("Validation-like workflow error: %s", exc)
         return StandardResponse(
             success=False,
             message="request failed",
+
             data={},
             metadata={},
             citations=[],
