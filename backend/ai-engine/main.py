@@ -78,7 +78,7 @@ app.include_router(profiling_router)
 app.include_router(ask_v2_router)
 
 # Mount Django WSGI Application on /api and /admin for single-process deployment
-from fastapi.middleware.wsgi import WSGIMiddleware
+from a2wsgi import WSGIMiddleware
 django_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "django-api"))
 if django_dir not in sys.path:
     sys.path.insert(0, django_dir)

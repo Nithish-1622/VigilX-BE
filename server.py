@@ -15,6 +15,7 @@ for path_str in [str(root_dir), str(backend_dir), str(django_dir), str(ai_engine
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 if __name__ == "__main__":
+    # pyrefly: ignore [missing-import]
     import uvicorn
     
     # Zoho Catalyst AppSail injects X_ZOHO_CATALYST_LISTEN_PORT or PORT at runtime
