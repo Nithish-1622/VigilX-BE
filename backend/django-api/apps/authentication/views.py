@@ -44,7 +44,8 @@ class LogoutView(APIView):
     """
     Endpoint to terminate session and log out the user.
     """
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
 
     def post(self, request):
         try:

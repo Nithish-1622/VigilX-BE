@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "c7a6e11b-9f34-4a25-a109-847291a82f34",
-		"name": "VigilX Crime Intelligence Platform - Complete 87 Endpoints Collection",
-		"description": "Exhaustive, 100% complete Postman collection containing all 87 API endpoints across Django REST Gateway (Port 8000) and FastAPI AI Engine (Port 8001).",
+		"name": "VigilX Crime Intelligence Platform - All 87 Endpoints Collection",
+		"description": "Complete 87 endpoint Postman collection explicitly mapping every single route from the VigilX Backend specification.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -19,10 +19,10 @@
 	],
 	"item": [
 		{
-			"name": "1. Authentication (Django)",
+			"name": "1. Django API - Core CRUD & Authentication (Routes 1-7, 62-64)",
 			"item": [
 				{
-					"name": "Login (Officer User)",
+					"name": "62. POST /api/auth/login/",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -52,7 +52,7 @@
 					"response": []
 				},
 				{
-					"name": "Refresh Token",
+					"name": "63. POST /api/auth/refresh/",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -72,7 +72,7 @@
 					"response": []
 				},
 				{
-					"name": "Logout",
+					"name": "64. POST /api/auth/logout/",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -90,14 +90,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "2. Core CRUD & Case Gateway (Django)",
-			"item": [
+				},
 				{
-					"name": "Get All Users",
+					"name": "1. GET /api/users/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -116,7 +111,7 @@
 					"response": []
 				},
 				{
-					"name": "Get All Cases",
+					"name": "2. GET /api/cases/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -135,24 +130,124 @@
 					"response": []
 				},
 				{
-					"name": "Filter Case by FIR ID",
+					"name": "3. GET /api/victims/",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/cases/?fir_id=101",
+							"raw": "{{baseUrl}}/api/victims/",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"cases",
+								"victims",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. GET /api/accused/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accused/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"accused",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. GET /api/entities/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entities/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. GET /api/investigations/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/investigations/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"investigations",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. GET & POST /api/audit/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/audit/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"audit",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Django API - Advanced Analytics & Search (Routes 8-25)",
+			"item": [
+				{
+					"name": "8. GET /api/suggest/",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/suggest/?q=robbery",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"suggest",
 								""
 							],
 							"query": [
 								{
-									"key": "fir_id",
-									"value": "101"
+									"key": "q",
+									"value": "robbery"
 								}
 							]
 						}
@@ -160,32 +255,27 @@
 					"response": []
 				},
 				{
-					"name": "Search Cases (Fuzzy Search)",
+					"name": "9. GET /api/analytics/entity-resolution/",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/cases/?search=ROBBERY",
+							"raw": "{{baseUrl}}/api/analytics/entity-resolution/",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"api",
-								"cases",
+								"analytics",
+								"entity-resolution",
 								""
-							],
-							"query": [
-								{
-									"key": "search",
-									"value": "ROBBERY"
-								}
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Get Virtual Case Folder",
+					"name": "10. GET /api/cases/<fir_id>/folder/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -206,7 +296,7 @@
 					"response": []
 				},
 				{
-					"name": "Bulk FIR Upload (CSV)",
+					"name": "11. POST /api/cases/bulk-upload/",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -226,177 +316,7 @@
 					"response": []
 				},
 				{
-					"name": "Get All Victims",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/victims/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"victims",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Accused / Suspects",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/accused/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"accused",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Filter Accused by Name",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/accused/?name=Rajesh",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"accused",
-								""
-							],
-							"query": [
-								{
-									"key": "name",
-									"value": "Rajesh"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Clue Entities",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/entities/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"entities",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Investigation Logs",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/investigations/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"investigations",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get System Audit Logs",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/audit/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"audit",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Auto-Suggest Search",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/suggest/?q=rob",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"suggest",
-								""
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "rob"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Entity Resolution (Duplicates)",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/analytics/entity-resolution/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"analytics",
-								"entity-resolution",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "3. Phase 4 & 5: Big Data & Demographics (Django)",
-			"item": [
-				{
-					"name": "Spatio-Temporal Trends",
+					"name": "12. GET /api/analytics/trends/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -416,7 +336,7 @@
 					"response": []
 				},
 				{
-					"name": "Seasonal Analytics",
+					"name": "13. GET /api/analytics/seasonal/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -436,7 +356,7 @@
 					"response": []
 				},
 				{
-					"name": "Modus Operandi Frequency",
+					"name": "14. GET /api/analytics/mo/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -456,7 +376,7 @@
 					"response": []
 				},
 				{
-					"name": "Comparative Dashboard",
+					"name": "15. GET /api/analytics/compare/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -476,7 +396,7 @@
 					"response": []
 				},
 				{
-					"name": "Anomaly Detection",
+					"name": "16. GET /api/analytics/anomalies/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -496,7 +416,7 @@
 					"response": []
 				},
 				{
-					"name": "GIS Mapping Coordinates",
+					"name": "17. GET /api/analytics/gis/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -516,7 +436,7 @@
 					"response": []
 				},
 				{
-					"name": "Pattern Mining",
+					"name": "18. GET /api/analytics/patterns/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -536,7 +456,7 @@
 					"response": []
 				},
 				{
-					"name": "Demographic Breakdown",
+					"name": "19. GET /api/analytics/demographics/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -556,7 +476,7 @@
 					"response": []
 				},
 				{
-					"name": "Socioeconomic Correlation",
+					"name": "20. GET /api/analytics/socioeconomic/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -576,7 +496,7 @@
 					"response": []
 				},
 				{
-					"name": "Population Density Metrics",
+					"name": "21. GET /api/analytics/population-density/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -596,7 +516,7 @@
 					"response": []
 				},
 				{
-					"name": "Migration & Mobility",
+					"name": "22. GET /api/analytics/mobility/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -616,7 +536,7 @@
 					"response": []
 				},
 				{
-					"name": "Environmental Risk Factors",
+					"name": "23. GET /api/analytics/risk-factors/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -636,7 +556,7 @@
 					"response": []
 				},
 				{
-					"name": "Public Safety Index",
+					"name": "24. GET /api/analytics/safety-index/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -656,7 +576,7 @@
 					"response": []
 				},
 				{
-					"name": "Interactive Socio Reports",
+					"name": "25. GET /api/analytics/socio-reports/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -678,10 +598,10 @@
 			]
 		},
 		{
-			"name": "4. Phase 5: Suspect Profiling (Django)",
+			"name": "3. Django API - Profiling & Decision Support (Routes 26-42)",
 			"item": [
 				{
-					"name": "Repeat Offenders History",
+					"name": "26. GET /api/profiling/repeat-offenders/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -702,7 +622,7 @@
 					"response": []
 				},
 				{
-					"name": "Behavioral Pattern Clusters",
+					"name": "27. GET /api/profiling/behavioral-clusters/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -722,7 +642,7 @@
 					"response": []
 				},
 				{
-					"name": "Risk Score (Suspect 101)",
+					"name": "28. GET /api/profiling/risk-score/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -743,7 +663,7 @@
 					"response": []
 				},
 				{
-					"name": "Predictive Recidivism",
+					"name": "29. GET /api/profiling/recidivism/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -764,7 +684,7 @@
 					"response": []
 				},
 				{
-					"name": "Criminological Theory Mapping",
+					"name": "30. GET /api/profiling/theory/<fir_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -785,7 +705,7 @@
 					"response": []
 				},
 				{
-					"name": "Historical Pattern References",
+					"name": "31. GET /api/profiling/historical-matches/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -806,7 +726,7 @@
 					"response": []
 				},
 				{
-					"name": "MO Tracking Profile",
+					"name": "32. GET /api/profiling/mo-tracking/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -827,7 +747,7 @@
 					"response": []
 				},
 				{
-					"name": "Network Profiling",
+					"name": "33. GET /api/profiling/network/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -848,7 +768,7 @@
 					"response": []
 				},
 				{
-					"name": "Demographic Profiling",
+					"name": "34. GET /api/profiling/demographics/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -867,14 +787,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "5. Phase 6: Decision Support (Django)",
-			"item": [
+				},
 				{
-					"name": "Case AI Summary",
+					"name": "35. GET /api/cases/<fir_id>/ai-summary/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -895,7 +810,7 @@
 					"response": []
 				},
 				{
-					"name": "Case Investigation Timeline",
+					"name": "36. GET /api/cases/<fir_id>/timeline/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -916,7 +831,7 @@
 					"response": []
 				},
 				{
-					"name": "Mathematically Similar Cases",
+					"name": "37. GET /api/cases/<fir_id>/similar/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -937,7 +852,7 @@
 					"response": []
 				},
 				{
-					"name": "Recommended Investigation Leads",
+					"name": "38. GET /api/cases/<fir_id>/leads/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -958,7 +873,7 @@
 					"response": []
 				},
 				{
-					"name": "Forensic Integration",
+					"name": "39. GET /api/cases/<fir_id>/forensics/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -979,7 +894,7 @@
 					"response": []
 				},
 				{
-					"name": "Evidence Gaps Analysis",
+					"name": "40. GET /api/cases/<fir_id>/evidence-gaps/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1000,7 +915,7 @@
 					"response": []
 				},
 				{
-					"name": "Automated Dispatch Alerts",
+					"name": "41. GET /api/alerts/dispatch/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1020,7 +935,7 @@
 					"response": []
 				},
 				{
-					"name": "Supervisor Performance Analytics",
+					"name": "42. GET /api/supervisor/analytics/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1042,10 +957,10 @@
 			]
 		},
 		{
-			"name": "6. Phase 8: Financial Crime & AML (Django)",
+			"name": "4. Django API - Finance, Forecasting & XAI (Routes 43-61, 65)",
 			"item": [
 				{
-					"name": "Transaction Network Mapping",
+					"name": "43. GET /api/finance/network/<account_number>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1066,7 +981,7 @@
 					"response": []
 				},
 				{
-					"name": "Suspicious Transactions Queue",
+					"name": "44. GET /api/finance/suspicious/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1086,7 +1001,7 @@
 					"response": []
 				},
 				{
-					"name": "Financial Entity Link",
+					"name": "45. GET /api/finance/entity-link/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1107,7 +1022,7 @@
 					"response": []
 				},
 				{
-					"name": "AML Workflow Report",
+					"name": "46. GET /api/finance/aml/report/<txn_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1129,7 +1044,7 @@
 					"response": []
 				},
 				{
-					"name": "Cross-Border Tracing",
+					"name": "47. GET /api/finance/cross-border/<account_number>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1150,7 +1065,7 @@
 					"response": []
 				},
 				{
-					"name": "Financial Case Report",
+					"name": "48. GET /api/finance/report/<fir_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1171,7 +1086,7 @@
 					"response": []
 				},
 				{
-					"name": "Fraud Pattern Matching",
+					"name": "49. GET /api/finance/fraud-patterns/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1189,14 +1104,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "7. Phase 9: All 8 Forecasting Endpoints (Django)",
-			"item": [
+				},
 				{
-					"name": "1. Hotspot Prediction Modeling",
+					"name": "50. GET /api/forecasting/hotspots/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1216,7 +1126,7 @@
 					"response": []
 				},
 				{
-					"name": "2. Gang Activity Early Warnings",
+					"name": "51. GET /api/forecasting/gang-alerts/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1236,7 +1146,7 @@
 					"response": []
 				},
 				{
-					"name": "3. Trend Extrapolation",
+					"name": "52. GET /api/forecasting/trends/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1256,7 +1166,7 @@
 					"response": []
 				},
 				{
-					"name": "4. Strategic Early Warnings",
+					"name": "53. GET /api/forecasting/warnings/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1276,7 +1186,7 @@
 					"response": []
 				},
 				{
-					"name": "5. Predictive Staffing Allocation",
+					"name": "54. GET /api/forecasting/staffing/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1296,7 +1206,7 @@
 					"response": []
 				},
 				{
-					"name": "6. Model Retraining Trigger",
+					"name": "55. GET /api/forecasting/retrain/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1316,7 +1226,7 @@
 					"response": []
 				},
 				{
-					"name": "7. Event-Driven Forecasting",
+					"name": "56. GET /api/forecasting/events/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1336,7 +1246,7 @@
 					"response": []
 				},
 				{
-					"name": "8. Re-Offender Parolee Warnings",
+					"name": "57. GET /api/forecasting/re-offender-alerts/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1354,35 +1264,9 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "8. Phase 10: XAI & Court Reports (Django)",
-			"item": [
-				{
-					"name": "Generate Court PDF Dossier",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/api/cases/101/report/",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"cases",
-								"101",
-								"report",
-								""
-							]
-						}
-					},
-					"response": []
 				},
 				{
-					"name": "Reasoning Visualization",
+					"name": "58. GET /api/xai/reasoning/<query_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1403,7 +1287,7 @@
 					"response": []
 				},
 				{
-					"name": "Model Transparency & Bias Metrics",
+					"name": "59. GET /api/xai/transparency/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1423,7 +1307,7 @@
 					"response": []
 				},
 				{
-					"name": "Explainable Risk Factors",
+					"name": "60. GET /api/xai/explain-risk/<accused_id>/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1444,7 +1328,7 @@
 					"response": []
 				},
 				{
-					"name": "Ethical Guardrails Config",
+					"name": "61. GET /api/xai/guardrails/",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1462,14 +1346,35 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "65. GET /api/cases/<pk>/report/ (Court PDF)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/report/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"report",
+								""
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "9. All 22 FastAPI AI Engine Endpoints (Port 8001)",
+			"name": "5. FastAPI AI Engine (Routes 66-87)",
 			"item": [
 				{
-					"name": "1. Ask AI - Agentic Search",
+					"name": "66. POST /ai/ask",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1497,7 +1402,7 @@
 					"response": []
 				},
 				{
-					"name": "2. Get Chat History",
+					"name": "67. GET /ai/history/{user_id}/{session_id}",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1517,7 +1422,7 @@
 					"response": []
 				},
 				{
-					"name": "3. Clear Chat History",
+					"name": "68. DELETE /ai/history/{user_id}/{session_id}",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -1537,7 +1442,7 @@
 					"response": []
 				},
 				{
-					"name": "4. Export History as PDF",
+					"name": "69. GET /ai/history/{user_id}/{session_id}/export.pdf",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1558,7 +1463,7 @@
 					"response": []
 				},
 				{
-					"name": "5. Submit AI Feedback",
+					"name": "70. POST /ai/feedback",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1586,7 +1491,7 @@
 					"response": []
 				},
 				{
-					"name": "6. Upload Document (OCR)",
+					"name": "71. POST /ai/documents/upload",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1605,7 +1510,7 @@
 					"response": []
 				},
 				{
-					"name": "7. Document Status",
+					"name": "72. GET /ai/documents/status/{doc_id}",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1625,7 +1530,7 @@
 					"response": []
 				},
 				{
-					"name": "8. Get Processed Document",
+					"name": "73. GET /ai/documents/{doc_id}",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1644,7 +1549,7 @@
 					"response": []
 				},
 				{
-					"name": "9. Process Document Batch",
+					"name": "74. POST /ai/documents/process-batch",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1663,7 +1568,7 @@
 					"response": []
 				},
 				{
-					"name": "10. Graph Visualize",
+					"name": "75. GET /ai/graph/visualize",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1688,7 +1593,7 @@
 					"response": []
 				},
 				{
-					"name": "11. Graph Community Ranks",
+					"name": "76. GET /ai/graph/community",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1707,7 +1612,7 @@
 					"response": []
 				},
 				{
-					"name": "12. Graph Centrality Hubs",
+					"name": "77. GET /ai/graph/centrality",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1726,7 +1631,7 @@
 					"response": []
 				},
 				{
-					"name": "13. Graph Shortest Path",
+					"name": "78. GET /ai/graph/shortest-path",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1755,7 +1660,7 @@
 					"response": []
 				},
 				{
-					"name": "14. Graph Geographic Mapping",
+					"name": "79. GET /ai/graph/geography",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1774,7 +1679,7 @@
 					"response": []
 				},
 				{
-					"name": "15. Graph Temporal Evolution",
+					"name": "80. GET /ai/graph/temporal",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1799,7 +1704,7 @@
 					"response": []
 				},
 				{
-					"name": "16. Graph Hidden Link Discovery",
+					"name": "81. GET /ai/graph/hidden-links",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1824,7 +1729,7 @@
 					"response": []
 				},
 				{
-					"name": "17. Graph Cypher Query",
+					"name": "82. POST /ai/graph/query",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1849,7 +1754,7 @@
 					"response": []
 				},
 				{
-					"name": "18. Graph Subgraph Export",
+					"name": "83. GET /ai/graph/export",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1874,7 +1779,7 @@
 					"response": []
 				},
 				{
-					"name": "19. Offender Story Narrative",
+					"name": "84. GET /ai/profiling/story/{accused_id}",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1894,7 +1799,7 @@
 					"response": []
 				},
 				{
-					"name": "20. Offender Psych Profile",
+					"name": "85. GET /ai/profiling/psych-profile/{accused_id}",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -1914,7 +1819,7 @@
 					"response": []
 				},
 				{
-					"name": "21. Voice Transcription (STT)",
+					"name": "86. POST /ai/transcribe",
 					"request": {
 						"method": "POST",
 						"header": [],
@@ -1932,7 +1837,7 @@
 					"response": []
 				},
 				{
-					"name": "22. Text-to-Speech (TTS)",
+					"name": "87. GET /ai/speak",
 					"request": {
 						"method": "GET",
 						"header": [],
