@@ -5,13 +5,15 @@ Django settings for config project.
 import os
 from pathlib import Path
 from datetime import timedelta
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables
-load_dotenv(BASE_DIR.parent.parent / '.env')
+# Load environment variables from .env if present (local dev only).
+# override=False ensures Catalyst-injected env vars are never overwritten in production.
+load_dotenv(BASE_DIR.parent.parent / '.env', override=False)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
@@ -142,7 +144,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
+    origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()
 ]
 # Fallback CORS origins for local testing
 if not CORS_ALLOWED_ORIGINS:
