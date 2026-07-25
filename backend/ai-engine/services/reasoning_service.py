@@ -25,7 +25,7 @@ class ReasoningService:
             "evidence_response_v1.txt",
             question=question,
             conversation_summary=conversation_summary,
-            evidence_block=evidence_block,
+            evidence_block=evidence_block[:10000],
         )
 
         logger.info("Evidence passed to PromptService: %s", evidence_block)
@@ -35,42 +35,17 @@ class ReasoningService:
         if not response:
             # Dynamic generic fallback when LLM is unavailable
             try:
-                # The evidence block looks like:
-                # id=101; crime_type=THEFT; status=PENDING; accused=[{name=Rajesh Kumar}]
                 lines = evidence_block.split('\n')
-                summary = []
-                import re
-                seen_ids = set()
+                summary = ["Based on available records:"]
                 
-                for line in lines:
-                    if not line.strip():
-                        continue
-                        
-                    # Deduplicate by ID to ignore [source] prefix
-                    match = re.search(r'id=(\d+)', line)
-                    if match:
-                        rec_id = match.group(1)
-                        if rec_id in seen_ids:
-                            continue
-                        seen_ids.add(rec_id)
-                        
-                    # Clean up the [source] prefix if it exists before splitting
-                    clean_line = re.sub(r'^\[.*?\]\s*', '', line)
-                    parts = clean_line.split('; ')
-                    summary.append("Found Record:")
-                    for part in parts:
-                        if '=' in part:
-                            key, val = part.split('=', 1)
-                            key = key.replace('_', ' ').title()
-                            if val.startswith('[') and val.endswith(']'):
-                                # Format lists of dicts beautifully
-                                val = val.strip('[]')
-                                if not val:
-                                    val = "None"
-                                else:
-                                    items = val.split(' | ')
-                                    val = ", ".join(items).replace('{', '').replace('}', '')
-                            summary.append(f"  - {key}: {val}")
+                for line in lines[:30]:  # Allow more lines to capture nested data
+                    clean = re.sub(r"^\[.*?\]\s*", "", line)
+                    if clean.strip():
+                        summary.append(f"• {clean.strip()}")
+
+                if len(lines) > 30:
+                    summary.append("• ... (additional details truncated)")
+
                 return "\n".join(summary)
             except Exception:
                 return evidence_block
