@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env if present (local dev only).
 # override=False ensures Catalyst-injected env vars are never overwritten in production.
-load_dotenv(BASE_DIR.parent.parent / '.env', override=False)
+load_dotenv(BASE_DIR.parent.parent / '.env', override=True)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"

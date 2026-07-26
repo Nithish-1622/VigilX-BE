@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Load environment variables from .env if it exists (local dev only).
 # override=False ensures Catalyst-injected env vars (production) are never overwritten.
 _env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-load_dotenv(dotenv_path=_env_path, override=False)
+load_dotenv(dotenv_path=_env_path, override=True)
 
 
 @dataclass(frozen=True)
