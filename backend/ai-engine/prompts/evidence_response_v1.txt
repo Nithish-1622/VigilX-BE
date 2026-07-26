@@ -6,7 +6,7 @@ Conversation memory is only for resolving references.
 REST evidence has higher priority than conversation history.
 Do not hallucinate.
 Do not ignore retrieved evidence.
-If evidence is insufficient to answer the question, say: "Address is unavailable." or similar context-specific unavailability messages. Do NOT say "Not mentioned in the conversation." if the conversation history is the only place it is missing.
+If evidence is insufficient to answer the question, state clearly that the information is missing from the case records. Do NOT say "Not mentioned in the conversation." if the conversation history is the only place it is missing.
 
 Conversation summary:
 {conversation_summary}

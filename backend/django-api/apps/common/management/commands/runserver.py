@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+# pyrefly: ignore [missing-import]
 from django.contrib.staticfiles.management.commands.runserver import Command as StaticfilesRunserverCommand
 
 class Command(StaticfilesRunserverCommand):
@@ -34,7 +35,7 @@ class Command(StaticfilesRunserverCommand):
                 
                 cmd = [
                     venv_python, "-m", "uvicorn", "main:app",
-                    "--host", "127.0.0.1",
+                    "--host", "0.0.0.0",
                     "--port", "8001"
                 ]
                 
@@ -47,7 +48,7 @@ class Command(StaticfilesRunserverCommand):
                     stdout=sys.stdout,
                     stderr=sys.stderr
                 )
-                self.stdout.write(self.style.SUCCESS(f"FastAPI server launched successfully (PID: {fastapi_proc.pid}) at http://127.0.0.1:8001"))
+                self.stdout.write(self.style.SUCCESS(f"FastAPI server launched successfully (PID: {fastapi_proc.pid}) on port 8001 (0.0.0.0)"))
             except Exception as e:
                 self.stdout.write(self.style.WARNING(f"Failed to launch FastAPI server: {e}"))
         

@@ -1,3 +1,4 @@
+import re
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.db.models import Q
@@ -44,28 +45,49 @@ class FIRViewSet(viewsets.ModelViewSet):
         if date_end:
             queryset = queryset.filter(incident_date_time__lte=date_end)
         if fir_id_val:
-            import re
-            digit_groups = re.findall(r'\d+', fir_id_val)
-            if digit_groups:
-                extracted_id = int(digit_groups[-1])
-                queryset = queryset.filter(id=extracted_id)
+            # First try exact match on fir_number field
+            fir_qs = queryset.filter(fir_number__iexact=fir_id_val)
+            if fir_qs.exists():
+                queryset = fir_qs
             else:
-                try:
-                    queryset = queryset.filter(id=int(fir_id_val))
-                except ValueError:
-                    pass
-        if search_query:
+                # Fallback: extract numeric ID from FIR reference
+                digit_groups = re.findall(r'\d+', fir_id_val)
+                if digit_groups:
+                    extracted_id = int(digit_groups[-1])
+                    queryset = queryset.filter(id=extracted_id)
+                else:
+                    try:
+                        queryset = queryset.filter(id=int(fir_id_val))
+                    except ValueError:
+                        pass
+        name_val = self.request.query_params.get('name')
+        if name_val:
+            queryset = queryset.filter(
+                Q(accused__name__icontains=name_val) |
+                Q(victims__name__icontains=name_val) |
+                Q(complainants__name__icontains=name_val)
+            ).distinct()
+        if search_query and not fir_id_val:
             q_objects = Q()
-            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that'}
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that', 'status', 'crime', 'type', 'location', 'date', 'report', 'sections', 'applied', 'list', 'all', 'are', 'has', 'have', 'been', 'their', 'them', 'they', 'any', 'its', 'was', 'were', 'how', 'when', 'where', 'which'}
+            import re as _re
             for word in search_query.split():
+                word = _re.sub(r'[^\w\-]', '', word)  # strip punctuation
                 if len(word) > 2 and word.lower() not in stop_words:
-                    q_objects &= (
+                    # Skip words that look like FIR numbers (already handled by fir_id filter)
+                    if _re.match(r'^FIR-', word, _re.IGNORECASE):
+                        continue
+                    word_q = (
                         Q(fir_number__icontains=word) | 
                         Q(description__icontains=word) |
                         Q(accused__name__icontains=word) |
                         Q(victims__name__icontains=word) |
                         Q(complainants__name__icontains=word)
                     )
+                    if not q_objects:
+                        q_objects = word_q
+                    else:
+                        q_objects &= word_q
             if q_objects:
                 queryset = queryset.filter(q_objects).distinct()
             
@@ -114,7 +136,6 @@ class VictimViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name_val)
 
         if fir_val:
-            import re
             digit_groups = re.findall(r'\d+', fir_val)
             if digit_groups:
                 extracted_id = int(digit_groups[-1])
@@ -137,7 +158,10 @@ class VictimViewSet(viewsets.ModelViewSet):
             for word in search_query.split():
                 clean_word = re.sub(r'[^\w]', '', word)
                 if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
-                    q_objects &= Q(name__icontains=clean_word)
+                    if not q_objects:
+                        q_objects = Q(name__icontains=clean_word)
+                    else:
+                        q_objects &= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)
@@ -164,7 +188,6 @@ class AccusedViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name_val)
 
         if fir_val:
-            import re
             digit_groups = re.findall(r'\d+', fir_val)
             if digit_groups:
                 extracted_id = int(digit_groups[-1])
@@ -187,7 +210,10 @@ class AccusedViewSet(viewsets.ModelViewSet):
             for word in search_query.split():
                 clean_word = re.sub(r'[^\w]', '', word)
                 if len(clean_word) > 2 and clean_word.lower() not in stop_words and not re.search(r'\d+', clean_word):
-                    q_objects &= Q(name__icontains=clean_word)
+                    if not q_objects:
+                        q_objects = Q(name__icontains=clean_word)
+                    else:
+                        q_objects &= Q(name__icontains=clean_word)
 
             if q_objects:
                 queryset = queryset.filter(q_objects)

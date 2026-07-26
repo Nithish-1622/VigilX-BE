@@ -61,7 +61,7 @@ class RAGRetriever:
                 embeddings = list(embedding_model.embed([question]))
                 
                 search_result = client.search(
-                    collection_name="vigilx_cases",
+                    collection_name="crime_cases",
                     query_vector=embeddings[0].tolist(),
                     limit=3
                 )
@@ -70,7 +70,7 @@ class RAGRetriever:
                         "source": "qdrant_vector_search",
                         "id": point.id,
                         "score": point.score,
-                        "content": point.payload.get("text", "")
+                        "content": point.payload.get("brief_facts", "") or point.payload.get("text", "")
                     })
         except Exception as e:
             # Fallback gracefully if Qdrant is unavailable or not configured
@@ -106,9 +106,9 @@ class RAGRetriever:
         if intent == "case_lookup":
             return RestCapability.CASE_SEARCH
         if intent == "suspect_query":
-            return RestCapability.ACCUSED_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "victim_query":
-            return RestCapability.VICTIM_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "timeline_query":
             return RestCapability.CASE_SUMMARY
         if intent == "evidence_summary":

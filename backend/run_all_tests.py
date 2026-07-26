@@ -1,4 +1,5 @@
 import os
+# pyrefly: ignore [missing-import]
 import django
 import sys
 
@@ -7,7 +8,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'django-api'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
+# pyrefly: ignore [missing-import]
 from django.contrib.auth import get_user_model
+# pyrefly: ignore [missing-import]
 from rest_framework_simplejwt.tokens import RefreshToken
 import requests
 import time

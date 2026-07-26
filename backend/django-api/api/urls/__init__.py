@@ -5,7 +5,8 @@ from apps.users.views import UserViewSet
 from apps.cases.views import FIRViewSet, VictimViewSet, AccusedViewSet, ClueEntityViewSet
 from apps.investigation.views import InvestigationLogViewSet
 from apps.audit.views import AuditLogViewSet
-from apps.authentication.views import LoginView, RefreshView, LogoutView
+from apps.authentication.views import LoginView, RefreshView, LogoutView, MeView, ProvidersView
+
 from apps.reports.views import CaseReportView
 
 # Central REST Router for VigilX models
@@ -107,6 +108,8 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='auth_login'),
     path('auth/refresh/', RefreshView.as_view(), name='auth_token_refresh'),
     path('auth/logout/', LogoutView.as_view(), name='auth_logout'),
+    path('auth/me/', MeView.as_view(), name='auth_me'),
+    path('auth/providers/', ProvidersView.as_view(), name='auth_providers'),
 
     # Case Report Export (PDF Generation)
     path('cases/<int:pk>/report/', CaseReportView.as_view(), name='case_pdf_report'),

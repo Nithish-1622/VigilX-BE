@@ -16,8 +16,8 @@ class MockSettings:
 def manager():
     return Neo4jConnectionManager()
 
-@patch('neo4j.connection.get_settings')
-@patch('neo4j.connection.GraphDatabase.driver')
+@patch('db_neo4j.connection.get_settings')
+@patch('db_neo4j.connection.GraphDatabase.driver')
 def test_manager_initialization_success(mock_driver, mock_get_settings, manager):
     """Test successful initialization of the connection manager."""
     mock_get_settings.return_value = MockSettings()
@@ -36,7 +36,7 @@ def test_manager_initialization_success(mock_driver, mock_get_settings, manager)
     mock_driver_instance.verify_connectivity.assert_called_once()
     assert manager._driver is not None
 
-@patch('neo4j.connection.get_settings')
+@patch('db_neo4j.connection.get_settings')
 def test_manager_initialization_missing_config(mock_get_settings, manager):
     """Test initialization fails when config is invalid."""
     # Simulate the validation error raised by get_settings
@@ -45,7 +45,7 @@ def test_manager_initialization_missing_config(mock_get_settings, manager):
     with pytest.raises(GraphConfigurationError):
         manager.initialize()
 
-@patch('neo4j.health.graph_manager')
+@patch('db_neo4j.health.graph_manager')
 def test_health_check_healthy(mock_graph_manager):
     """Test health check when database is responsive."""
     mock_graph_manager.execute_read_query.return_value = [{"health_check": 1}]
@@ -55,7 +55,7 @@ def test_health_check_healthy(mock_graph_manager):
     assert status["status"] == "healthy"
     assert status["details"] == "Database is responsive."
 
-@patch('neo4j.health.graph_manager')
+@patch('db_neo4j.health.graph_manager')
 def test_health_check_unhealthy(mock_graph_manager):
     """Test health check when database query fails."""
     mock_graph_manager.execute_read_query.side_effect = GraphConnectionError("Connection lost")

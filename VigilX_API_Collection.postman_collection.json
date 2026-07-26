@@ -427,6 +427,87 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Ask AI V2 - Multi-Agent Investigation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": \"17611ebc-84f0-4cfc-8c18-95fb979f6c2b\",\n  \"session_id\": \"postman-session-v2\",\n  \"question\": \"Give me the network connections and cases related to suspect Rajesh.\"\n}"
+						},
+						"url": {
+							"raw": "{{aiUrl}}/ai/v2/ask",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"v2",
+								"ask"
+							]
+						},
+						"description": "V2 Multi-Agent Orchestrator pipeline. Wires 20 agents using event-driven dynamic tool routing and evidence verification checks."
+					},
+					"response": []
+				},
+				{
+					"name": "Get V2 Tool Registry",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{aiUrl}}/ai/v2/registry",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"v2",
+								"registry"
+							]
+						},
+						"description": "Returns a list of all dynamically registered capabilities in the ToolCapabilityRegistry."
+					},
+					"response": []
+				},
+				{
+					"name": "V2 AI Engine Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/v2/health",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"v2",
+								"health"
+							]
+						},
+						"description": "Returns V2 server status, pipeline type, and number of active agents."
+					},
+					"response": []
 				}
 			]
 		}
