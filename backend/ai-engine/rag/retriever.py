@@ -106,9 +106,9 @@ class RAGRetriever:
         if intent == "case_lookup":
             return RestCapability.CASE_SEARCH
         if intent == "suspect_query":
-            return RestCapability.ACCUSED_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "victim_query":
-            return RestCapability.VICTIM_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "timeline_query":
             return RestCapability.CASE_SUMMARY
         if intent == "evidence_summary":

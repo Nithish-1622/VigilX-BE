@@ -39,6 +39,11 @@ class LLMReasoningAgent(BaseAgent):
         bundle = state.get("evidence_bundle")
         evidence_text = bundle.top_evidence_text if bundle else ""
 
+        # Truncate evidence text to prevent HTTP 413 (Payload Too Large) from the LLM provider
+        MAX_EVIDENCE_CHARS = 10000
+        if len(evidence_text) > MAX_EVIDENCE_CHARS:
+            evidence_text = evidence_text[:MAX_EVIDENCE_CHARS] + "\n... (evidence truncated due to size limits)"
+
         if not evidence_text.strip():
             state["reasoning_output"] = (
                 "Insufficient evidence to provide a factual answer. "
@@ -80,20 +85,18 @@ class LLMReasoningAgent(BaseAgent):
     def _deterministic_format(self, evidence_text: str) -> str:
         """
         Deterministic fallback when LLM is unavailable.
-        Formats raw evidence into a structured bullet list.
+        Formats raw evidence into a structured list, preserving essential details.
         Strips source prefixes like '[django_api|EVD-001]'.
         """
-        lines = [ln.strip() for ln in evidence_text.split("\n") if ln.strip()]
+        lines = [ln.rstrip() for ln in evidence_text.split("\n") if ln.strip()]
         formatted: list[str] = ["Based on available records:"]
-        seen: set[str] = set()
-
-        for line in lines[:6]:
-            # Strip '[source|ref]' prefix
+        
+        for line in lines[:30]:  # Allow more lines to capture nested data
             clean = re.sub(r"^\[.*?\]\s*", "", line)
-            # Deduplicate by first 60 chars
-            key = clean[:60]
-            if key not in seen and clean:
+            if clean:
                 formatted.append(f"• {clean}")
-                seen.add(key)
+
+        if len(lines) > 30:
+            formatted.append("• ... (additional details truncated)")
 
         return "\n".join(formatted)
