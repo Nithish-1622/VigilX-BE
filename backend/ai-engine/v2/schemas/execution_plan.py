@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ToolType(str, Enum):
@@ -39,9 +39,17 @@ class ToolCall(BaseModel):
     tool: ToolType
     priority: int = 1                                    # Lower = higher priority group
     dependency: DependencyType = DependencyType.INDEPENDENT
-    rationale: str
+    rationale: str = ""
     parameters: dict[str, Any] = Field(default_factory=dict)
     subtask_id: str | None = None                        # Links to a Subtask
+
+    @field_validator("tool", mode="before")
+    @classmethod
+    def normalize_tool_name(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            return v.lower().strip().replace("_tool", "").replace("tool_", "")
+        return v
+
 
 
 class ExecutionPlan(BaseModel):
