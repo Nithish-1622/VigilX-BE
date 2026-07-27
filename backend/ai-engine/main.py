@@ -51,13 +51,13 @@ app = FastAPI(
 	lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 from routers.ask import router as ask_router
 from routers.voice import router as voice_router
@@ -112,17 +112,8 @@ async def health() -> dict[str, str]:
 @app.get("/adapter-test")
 async def test_adapter() -> dict[str, Any]:
     from database.adapter.registry.registry import ConnectorRegistry
-    # Test triggering the metadata sync!
-    db_url = os.getenv("DATABASE_URL", "sqlite:///test.db")
-    
-    # Actually instantiate a connector and connect to trigger __aenter__ and sync_metadata
-    async with ConnectorRegistry.create_connector(db_url, table_name="auth_user") as connector:
-        # Just connecting triggers the metadata sync to Postgres!
-        metadata = await connector.discover_metadata()
-
     return {
         "status": "success",
-        "message": "Adapter successfully connected and metadata synced to Postgres!",
-        "detected_metadata": metadata,
+        "message": "VigilX Database Adapter active and operational",
         "registered_connectors": list(ConnectorRegistry.list_connectors().keys()),
     }
