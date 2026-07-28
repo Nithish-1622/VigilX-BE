@@ -48,7 +48,7 @@ class SQLToolAgent:
                         val = str(v).strip()
                         if k in {"search", "query"}:
                             continue
-                        if k == "crime_type" and val.upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN", "PERSONAL", "PERSONAL_DATA", "AGE"}:
+                        if k == "crime_type" and val.upper() not in {"ROBBERY", "THEFT", "BURGLARY", "BANK_ROBBERY", "MURDER", "ASSAULT", "KIDNAPPING", "FRAUD", "CYBERCRIME", "DRUG_TRAFFICKING"}:
                             continue
                         structured_query.filters[k] = val
 
