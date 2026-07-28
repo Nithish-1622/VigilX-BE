@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, TypedDict
 from uuid import uuid4
+import asyncio
 
 from utils.logging import get_logger
 
@@ -255,19 +256,8 @@ class AIOrchestrator:
         context_headers = state.get("context_headers", {})
         # -----------------------------------------------------------------
         # Automatic metadata persistence for the universal adapter
+        # (Disabled in V1 to avoid blocking request latency)
         # -----------------------------------------------------------------
-        import os
-        from database.adapter import ConnectorRegistry
-        metadata_url = os.getenv("POSTGRES_METADATA_URL") or os.getenv("DATABASE_URL")
-        if metadata_url:
-            try:
-                async with ConnectorRegistry.create_connector(
-                    connection_string=metadata_url,
-                    table_name="metadata_sync"
-                ) as meta_connector:
-                    await meta_connector.sync_metadata()
-            except Exception as e:
-                logger.warning("Metadata sync failed for %s: %s", metadata_url, e)
         # Execute SQL plan using the universal adapter
         sql_result = await self._sql_agent.execute_plan(
             structured_query,
@@ -361,23 +351,25 @@ class AIOrchestrator:
         if intent in ["case_lookup", "criminal_network", "investigation_status"]:
             try:
                 import os
+                import asyncio
                 from neo4j import GraphDatabase
-                uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-                driver = GraphDatabase.driver(uri, auth=(os.environ.get("NEO4J_USER"), os.environ.get("NEO4J_PASSWORD")))
                 
-                # Fetch a basic summary of the central suspect's network or active community.
-                # Since we don't have a specific ID, we just ask for a general insight if applicable,
-                # or in a real system we'd extract the suspect ID from `state["structured_query"]`.
-                
-                query = """
-                MATCH (a:Person)-[r:ACCUSED_IN]->(c:Case)
-                RETURN a.name AS suspect, count(c) AS cases LIMIT 3
-                """
-                results = []
-                with driver.session() as session:
-                    for record in session.run(query):
-                        results.append(f"{record['suspect']} is linked to {record['cases']} cases.")
-                driver.close()
+                def _fetch_graph():
+                    uri = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+                    driver = GraphDatabase.driver(uri, auth=(os.environ.get("NEO4J_USER"), os.environ.get("NEO4J_PASSWORD")))
+                    
+                    query = """
+                    MATCH (a:Person)-[r:ACCUSED_IN]->(c:Case)
+                    RETURN a.name AS suspect, count(c) AS cases LIMIT 3
+                    """
+                    results = []
+                    with driver.session() as session:
+                        for record in session.run(query):
+                            results.append(f"{record['suspect']} is linked to {record['cases']} cases.")
+                    driver.close()
+                    return results
+
+                results = await asyncio.to_thread(_fetch_graph)
                 
                 if results:
                     graph_insight = "Graph Network Insight:\n" + "\n".join(results)
