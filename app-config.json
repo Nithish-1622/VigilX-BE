@@ -1,0 +1,5 @@
+{
+  "stack": "Python_3_11",
+  "command": "python3 server.py",
+  "build_path": "."
+}
