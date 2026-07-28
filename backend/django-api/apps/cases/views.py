@@ -69,7 +69,7 @@ class FIRViewSet(viewsets.ModelViewSet):
             ).distinct()
         if search_query and not fir_id_val:
             q_objects = Q()
-            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that', 'status', 'crime', 'type', 'location', 'date', 'report', 'sections', 'applied', 'list', 'all', 'are', 'has', 'have', 'been', 'their', 'them', 'they', 'any', 'its', 'was', 'were', 'how', 'when', 'where', 'which'}
+            stop_words = {'give', 'details', 'about', 'what', 'who', 'show', 'tell', 'find', 'search', 'suspect', 'accused', 'victim', 'case', 'fir', 'number', 'the', 'and', 'for', 'with', 'from', 'this', 'that', 'status', 'crime', 'type', 'location', 'date', 'report', 'sections', 'applied', 'list', 'all', 'are', 'has', 'have', 'been', 'their', 'them', 'they', 'any', 'its', 'was', 'were', 'how', 'when', 'where', 'which', 'age', 'old', 'years', 'does', 'did', 'can', 'could', 'please', 'know', 'information'}
             import re as _re
             for word in search_query.split():
                 word = _re.sub(r'[^\w\-]', '', word)  # strip punctuation
@@ -152,7 +152,9 @@ class VictimViewSet(viewsets.ModelViewSet):
                 'give', 'details', 'about', 'what', 'who', 'show',
                 'tell', 'find', 'search', 'suspect', 'accused',
                 'victim', 'case', 'fir', 'number', 'the',
-                'and', 'for', 'with', 'from', 'this', 'that'
+                'and', 'for', 'with', 'from', 'this', 'that',
+                'age', 'old', 'years', 'does', 'did', 'can', 'could',
+                'please', 'know', 'information'
             }
 
             for word in search_query.split():
@@ -204,7 +206,9 @@ class AccusedViewSet(viewsets.ModelViewSet):
                 'give', 'details', 'about', 'what', 'who', 'show',
                 'tell', 'find', 'search', 'suspect', 'accused',
                 'victim', 'case', 'fir', 'number', 'the',
-                'and', 'for', 'with', 'from', 'this', 'that'
+                'and', 'for', 'with', 'from', 'this', 'that',
+                'age', 'old', 'years', 'does', 'did', 'can', 'could',
+                'please', 'know', 'information'
             }
 
             for word in search_query.split():

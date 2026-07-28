@@ -34,15 +34,17 @@ class RAGRetriever:
             query_text=question,
             context={"mode": "rag"},
         )
-        response = self._rest_gateway.invoke(
+        import asyncio
+        response = await asyncio.to_thread(
+            self._rest_gateway.invoke,
             query,
-            auth_header=auth_header,
-            context_headers=context_headers,
+            auth_header,
+            context_headers,
         )
 
         items = []
         if response.success and isinstance(response.payload, dict):
-            raw_items = response.payload.get("items", [])
+            raw_items = response.payload.get("results", response.payload.get("items", []))
             if isinstance(raw_items, list):
                 items = [item for item in raw_items if isinstance(item, dict)]
                 
