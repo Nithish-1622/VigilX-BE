@@ -15,10 +15,11 @@ from fastapi import APIRouter, Header, HTTPException, status, BackgroundTasks
 import httpx
 
 from agents.workflow import AIOrchestrator
-from schemas.common import ErrorDetail, StandardResponse
+from schemas.common import ErrorDetail, StandardResponse, ResponseMetadata
 from schemas.conversation import AskRequest
 from utils.logging import get_logger
 from utils.config import settings
+from uuid import uuid4
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/ai", tags=["ai-engine"])
