@@ -59,9 +59,6 @@ class RAGRetriever:
             qdrant_api_key = os.environ.get("QDRANT_API_KEY")
             
             if qdrant_url and qdrant_api_key:
-                # AppSail serverless environments often have 256MB-512MB RAM limits.
-                # Loading a 133MB ONNX model via fastembed causes an OOM kill (SIGKILL),
-                # which cannot be caught and results in a 500 Server Error.
                 if os.getenv("X_ZOHO_CATALYST_LISTEN_PORT"):
                     raise Exception("Skipping fastembed on Catalyst AppSail to prevent OOM crash")
                     
