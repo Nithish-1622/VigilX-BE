@@ -98,8 +98,13 @@ class SQLAgentPlanner:
         if "crime_type" in filters and filters["crime_type"].upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN"}:
             del filters["crime_type"]
             
-        # If we have extracted specific filters like name or fir_id, we shouldn't send the full question to the full-text search.
-        query_text = question if not ("name" in filters or "fir_id" in filters) else ""
+        # Populate query_text so full-text search parameter is passed when appropriate
+        if "fir_id" in filters:
+            query_text = ""
+        elif "name" in filters:
+            query_text = filters["name"]
+        else:
+            query_text = question
 
         return StructuredQuery(
             capability=capability,
