@@ -87,7 +87,7 @@ class ToolCapabilityRegistry:
                 input_schema=ToolInputSchema(
                     required=[],
                     optional=["fir_id", "name", "crime_type", "status", "date_start", "date_end", "district"],
-                    example={"fir_id": "FIR-2026-001", "crime_type": "ROBBERY"},
+                    example={"crime_type": "ROBBERY"},
                 ),
                 output_description="List of structured records (FIRs, Accused, Victims, Investigation logs)",
                 supported_intents=["case_lookup", "suspect_query", "victim_query", "evidence_summary", "timeline_query", "investigation_status"],
@@ -128,7 +128,7 @@ class ToolCapabilityRegistry:
                 input_schema=ToolInputSchema(
                     required=["operation"],
                     optional=["data", "params", "field"],
-                    example={"operation": "count_by", "field": "crime_type"},
+                    example={"operation": "statistics", "field": "age"},
                 ),
                 output_description="Computed results: numbers, dates, statistics, extracted patterns",
                 supported_intents=["statistics_query", "timeline_query"],

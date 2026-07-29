@@ -10,12 +10,12 @@ class EvidenceService:
     def records_to_text(self, rows: list[dict]) -> str:
         if not rows:
             return ""
-        limited = rows[:5]
+        limited = rows[:25]
         return "\n".join(self._row_to_line(row) for row in limited)
 
     def records_to_citations(self, rows: list[dict]) -> list[Citation]:
         citations: list[Citation] = []
-        for row in rows[:5]:
+        for row in rows[:25]:
             ref_id = row.get("id") if isinstance(row, dict) else None
             citations.append(
                 Citation(
@@ -30,24 +30,21 @@ class EvidenceService:
     def format_row(self, row: dict) -> str:
         if not isinstance(row, dict):
             return str(row)
-
-        parts = []
-        for key, value in row.items():
-            if value is None:
+        
+        lines = ["[RECORD]"]
+        for k, v in row.items():
+            if v is None:
                 continue
-            if isinstance(value, list) and value:
-                nested = []
-                for item in value:
+            if isinstance(v, list) and v:
+                lines.append(f"  {k}:")
+                for item in v:
                     if isinstance(item, dict):
-                        nested.append("{" + ", ".join(f"{k}={v}" for k, v in item.items() if v is not None) + "}")
+                        lines.append("    - " + ", ".join(f"{sub_k}: {sub_v}" for sub_k, sub_v in item.items() if sub_v is not None))
                     else:
-                        nested.append(str(item))
-                parts.append(f"{key}=[" + " | ".join(nested) + "]")
-            elif str(value).strip():
-                parts.append(f"{key}={value}")
-        if parts:
-            return "; ".join(parts)
-        return str(row)
+                        lines.append(f"    - {item}")
+            else:
+                lines.append(f"  {k}: {v}")
+        return "\n".join(lines)
 
     def required_citations_for_intent(self, intent: str) -> int:
         if intent == "case_lookup":

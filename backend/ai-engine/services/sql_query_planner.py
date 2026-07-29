@@ -24,17 +24,13 @@ class SQLAgentPlanner:
         fir_match = re.search(r'\b(FIR(?:-[A-Z]{2})?-\d{4}-\d+|FIR-\d+)\b', question, re.IGNORECASE)
         if fir_match:
             filters["fir_id"] = fir_match.group(1).upper()
-            filters["fir"] = fir_match.group(1).upper()
-
-        # Look for name patterns (e.g. "is Rajesh Kumar")
-        name_match = re.search(r'\b(?:is|show|suspect|victim|for)\b\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)', question)
+            
+        # Look for name patterns safely: Match a capitalized First Last name
+        name_match = re.search(r'\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b', question)
         if name_match:
             name_val = name_match.group(1).strip()
-            # Avoid matching case, role or FIR words as name
-            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "burglary", "timeline", "detail", "suspect", "victim", "accused", "person"]):
-                filters["name"] = name_val
-
-        # Look for crime type patterns — only when NOT looking up a specific FIR
+            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "timeline", "detail", "suspect", "victim", "accused", "person"]):
+                filters["name"] = name_val        # Look for crime type patterns — only when NOT looking up a specific FIR
         if "fir_id" not in filters:
             for crime in ["ROBBERY", "THEFT", "BURGLARY", "BANK_ROBBERY", "MURDER",
                           "ASSAULT", "KIDNAPPING", "FRAUD", "CYBERCRIME", "DRUG_TRAFFICKING"]:
@@ -63,7 +59,7 @@ class SQLAgentPlanner:
         Question: "{question}"
         
         Return ONLY a raw JSON object containing these filters (empty {{}} if none found). No conversational filler or formatting blocks.
-        Example: {{"gender": "FEMALE", "age_limit": "under 18", "year": "2025", "crime_type": "THEFT", "status": "UNDER_INVESTIGATION"}}
+        Example: {{"name": "Rajesh Kumar", "gender": "FEMALE", "age_limit": "under 18", "year": "2025", "crime_type": "THEFT", "status": "UNDER_INVESTIGATION"}}
         """
         try:
             res = await self._llm_client.generate(prompt)
@@ -75,8 +71,18 @@ class SQLAgentPlanner:
                     for k, v in llm_filters.items():
                         if v and str(v).strip():
                             # Don't let LLM override regex-extracted fir_id
-                            if k == "fir_id" and k in filters:
+                            if k == "fir_id":
+                                if k in filters:
+                                    continue
+                                # Sanitize LLM hallucinations for fir_id (must contain a digit)
+                                import re as _re
+                                if not _re.search(r'\d', str(v)):
+                                    continue
+
+                            # Prevent LLM from hallucinating full text search filters
+                            if k in {"search", "query"}:
                                 continue
+
                             # Don't apply crime_type filter on specific FIR lookups
                             if k == "crime_type" and "fir_id" in filters:
                                 continue
@@ -87,12 +93,24 @@ class SQLAgentPlanner:
         # Sanitize name filter to ensure no role words slipped through
         if "name" in filters and filters["name"].lower().strip() in {"suspect", "victim", "accused", "person", "complainant", "officer", "the suspect", "the victim"}:
             del filters["name"]
+            
+        # Sanitize crime_type filter to prevent incorrect roles from being used as crime types
+        if "crime_type" in filters and filters["crime_type"].upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN"}:
+            del filters["crime_type"]
+            
+        # Populate query_text so full-text search parameter is passed when appropriate
+        if "fir_id" in filters:
+            query_text = ""
+        elif "name" in filters:
+            query_text = filters["name"]
+        else:
+            query_text = question
 
         return StructuredQuery(
             capability=capability,
             intent=intent,
             question=question,
-            query_text=question,
+            query_text=query_text,
             filters=filters,
         )
 
@@ -100,9 +118,9 @@ class SQLAgentPlanner:
         if intent == "case_lookup":
             return RestCapability.CASE_SEARCH
         if intent == "suspect_query":
-            return RestCapability.ACCUSED_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "victim_query":
-            return RestCapability.VICTIM_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "timeline_query":
             return RestCapability.CASE_SUMMARY
         if intent == "evidence_summary":

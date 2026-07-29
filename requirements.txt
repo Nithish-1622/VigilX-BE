@@ -24,3 +24,5 @@ pytesseract>=0.3.10
 asyncpg>=0.31.0
 gunicorn>=21.2.0
 Faker>=20.0.0
+a2wsgi
+httpx>=0.25.0

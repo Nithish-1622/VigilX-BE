@@ -8,6 +8,7 @@ from services.evidence_service import EvidenceService
 from services.rest_gateway import DjangoRestGateway
 from utils.config import settings
 
+_embedding_model = None
 
 @dataclass
 class RetrievedContext:
@@ -34,15 +35,17 @@ class RAGRetriever:
             query_text=question,
             context={"mode": "rag"},
         )
-        response = self._rest_gateway.invoke(
+        import asyncio
+        response = await asyncio.to_thread(
+            self._rest_gateway.invoke,
             query,
-            auth_header=auth_header,
-            context_headers=context_headers,
+            auth_header,
+            context_headers,
         )
 
         items = []
         if response.success and isinstance(response.payload, dict):
-            raw_items = response.payload.get("items", [])
+            raw_items = response.payload.get("results", response.payload.get("items", []))
             if isinstance(raw_items, list):
                 items = [item for item in raw_items if isinstance(item, dict)]
                 
@@ -56,15 +59,23 @@ class RAGRetriever:
             qdrant_api_key = os.environ.get("QDRANT_API_KEY")
             
             if qdrant_url and qdrant_api_key:
-                client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
-                embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-                embeddings = list(embedding_model.embed([question]))
+                if os.getenv("X_ZOHO_CATALYST_LISTEN_PORT"):
+                    raise Exception("Skipping fastembed on Catalyst AppSail to prevent OOM crash")
+                    
+                def run_qdrant_search():
+                    global _embedding_model
+                    if _embedding_model is None:
+                        _embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                    
+                    client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key, timeout=3.0)
+                    embeddings = list(_embedding_model.embed([question]))
+                    return client.search(
+                        collection_name="crime_cases",
+                        query_vector=embeddings[0].tolist(),
+                        limit=3
+                    )
                 
-                search_result = client.search(
-                    collection_name="crime_cases",
-                    query_vector=embeddings[0].tolist(),
-                    limit=3
-                )
+                search_result = await asyncio.to_thread(run_qdrant_search)
                 for point in search_result:
                     items.append({
                         "source": "qdrant_vector_search",
@@ -106,9 +117,9 @@ class RAGRetriever:
         if intent == "case_lookup":
             return RestCapability.CASE_SEARCH
         if intent == "suspect_query":
-            return RestCapability.ACCUSED_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "victim_query":
-            return RestCapability.VICTIM_RECORDS
+            return RestCapability.CASE_SEARCH
         if intent == "timeline_query":
             return RestCapability.CASE_SUMMARY
         if intent == "evidence_summary":

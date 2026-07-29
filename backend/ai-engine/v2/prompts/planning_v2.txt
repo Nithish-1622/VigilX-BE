@@ -26,6 +26,7 @@ INSTRUCTIONS:
 5. For complex/multi-hop queries: list all tools needed across subtasks.
 6. Only include "forecast" tool if the question explicitly asks for prediction or future trends.
 7. Set complexity to "multi_hop" if the question asks about multiple entities or requires chaining results.
+8. DO NOT invent, hallucinate, or guess parameters (like FIR IDs) unless they are explicitly present in the question.
 
 INTENT OPTIONS:
 case_lookup | suspect_query | victim_query | criminal_network | timeline_query | statistics_query | evidence_summary | investigation_status | follow_up | unknown

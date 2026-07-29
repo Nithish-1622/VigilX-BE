@@ -30,6 +30,11 @@ class DjangoRestGateway:
             )
 
         headers = context_headers.copy() if context_headers else {}
+        
+        # Always prioritize the internal service token for downstream requests.
+        # Passing the user's Catalyst auth_header fails in production because
+        # internal loopback requests bypass the Catalyst edge gateway, 
+        # stripping the necessary SDK headers.
         import os
         internal_token = os.getenv("AI_ENGINE_DOWNSTREAM_SERVICE_TOKEN")
         if internal_token:

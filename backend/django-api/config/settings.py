@@ -21,6 +21,9 @@ DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "*,localhost,127.0.0.1,testserver")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.strip()]
 
+csrf_origins_str = os.getenv("CSRF_TRUSTED_ORIGINS", "https://vigilx.onslate.in,https://vigilx.development.catalystappsail.in,http://localhost:5173,http://127.0.0.1:5173")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(",") if origin.strip()]
+
 # Application definition
 INSTALLED_APPS = [
     "apps.common.apps.CommonConfig",
@@ -47,7 +50,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    # "corsheaders.middleware.CorsMiddleware",  # Managed centrally by FastAPI CORSMiddleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

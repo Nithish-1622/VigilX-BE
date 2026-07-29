@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, TypedDict
 from uuid import uuid4
-
+import asyncio
 from utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -308,13 +308,14 @@ class AIOrchestrator:
                     filters={"fir_id": f_id}
                 )
                 try:
-                    case_res = self._rest_gateway.invoke(
+                    case_res = await asyncio.to_thread(
+                        self._rest_gateway.invoke,
                         case_query,
                         auth_header=auth_header,
                         context_headers=context_headers
                     )
                     if case_res.success:
-                        case_items = case_res.payload.get("items", [])
+                        case_items = case_res.payload.get("results", case_res.payload.get("items", []))
                         if isinstance(case_items, list):
                             for item in case_items:
                                 extra_texts.append(self._evidence.format_row(item))
