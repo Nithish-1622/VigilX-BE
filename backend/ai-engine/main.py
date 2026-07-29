@@ -29,14 +29,6 @@ if backend_root not in sys.path:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Starting %s v%s", settings.app_name, settings.app_version)
-    if os.getenv("DATABASE_URL"):
-        try:
-            import django
-            from django.core.management import call_command
-            call_command("migrate", "--noinput")
-            logger.info("Django database migrations completed successfully.")
-        except Exception as e:
-            logger.warning("Django migration check skipped/failed: %s", e)
     yield
     logger.info("Stopping %s", settings.app_name)
 

@@ -37,5 +37,10 @@ FRONTEND_ARCHITECTURE.md*
 
 *.md 
 !Readme.md
+!README.md
+
+# Frontend build & modules
+frontend/node_modules/
+frontend/dist/
 
 

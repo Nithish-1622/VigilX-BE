@@ -15,42 +15,46 @@ class Command(StaticfilesRunserverCommand):
         
         fastapi_proc = None
         if not is_reloader_parent:
-            self.stdout.write(self.style.SUCCESS("Django starting up... launching FastAPI AI Engine server in background..."))
-            try:
-                # Resolve paths
-                # Current file is in: backend/django-api/apps/common/management/commands/runserver.py
-                # Root workspace directory: d:/VigilX-BE
-                # django-api directory: backend/django-api
-                # ai-engine directory: backend/ai-engine
-                current_dir = os.path.dirname(os.path.abspath(__file__))
-                django_api_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
-                workspace_dir = os.path.dirname(django_api_dir)
-                ai_engine_dir = os.path.join(django_api_dir, "..", "ai-engine")
-                ai_engine_dir = os.path.abspath(ai_engine_dir)
-                
-                # Check virtual environment python executable
-                venv_python = os.path.join(workspace_dir, ".venv", "Scripts", "python.exe")
-                if not os.path.exists(venv_python):
-                    venv_python = sys.executable  # Fallback to current python interpreter
-                
-                cmd = [
-                    venv_python, "-m", "uvicorn", "main:app",
-                    "--host", "0.0.0.0",
-                    "--port", "8001"
-                ]
-                
-                self.stdout.write(f"Executing: {' '.join(cmd)}")
-                self.stdout.write(f"Working Directory: {ai_engine_dir}")
-                
-                fastapi_proc = subprocess.Popen(
-                    cmd,
-                    cwd=ai_engine_dir,
-                    stdout=sys.stdout,
-                    stderr=sys.stderr
-                )
-                self.stdout.write(self.style.SUCCESS(f"FastAPI server launched successfully (PID: {fastapi_proc.pid}) on port 8001 (0.0.0.0)"))
-            except Exception as e:
-                self.stdout.write(self.style.WARNING(f"Failed to launch FastAPI server: {e}"))
+            import socket
+            def is_port_in_use(port: int) -> bool:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    return s.connect_ex(('127.0.0.1', port)) == 0
+
+            if is_port_in_use(8001):
+                self.stdout.write(self.style.SUCCESS("FastAPI AI Engine is already active on port 8001."))
+            else:
+                self.stdout.write(self.style.SUCCESS("Django starting up... launching FastAPI AI Engine server in background..."))
+                try:
+                    # Resolve paths
+                    current_dir = os.path.dirname(os.path.abspath(__file__))
+                    django_api_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(current_dir))))
+                    workspace_dir = os.path.dirname(django_api_dir)
+                    ai_engine_dir = os.path.join(django_api_dir, "..", "ai-engine")
+                    ai_engine_dir = os.path.abspath(ai_engine_dir)
+                    
+                    # Check virtual environment python executable
+                    venv_python = os.path.join(workspace_dir, ".venv", "Scripts", "python.exe")
+                    if not os.path.exists(venv_python):
+                        venv_python = sys.executable  # Fallback to current python interpreter
+                    
+                    cmd = [
+                        venv_python, "-m", "uvicorn", "main:app",
+                        "--host", "0.0.0.0",
+                        "--port", "8001"
+                    ]
+                    
+                    self.stdout.write(f"Executing: {' '.join(cmd)}")
+                    self.stdout.write(f"Working Directory: {ai_engine_dir}")
+                    
+                    fastapi_proc = subprocess.Popen(
+                        cmd,
+                        cwd=ai_engine_dir,
+                        stdout=sys.stdout,
+                        stderr=sys.stderr
+                    )
+                    self.stdout.write(self.style.SUCCESS(f"FastAPI server launched successfully (PID: {fastapi_proc.pid}) on port 8001 (0.0.0.0)"))
+                except Exception as e:
+                    self.stdout.write(self.style.WARNING(f"Failed to launch FastAPI server: {e}"))
         
         try:
             super().inner_run(*args, **options)

@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
   "info": {
     "_postman_id": "c7a6e11b-9f34-4a25-a109-847291a82f34",
     "name": "VigilX Crime Intelligence Platform API",
@@ -2864,3 +2865,1965 @@
     }
   ]
 }
+=======
+	"info": {
+		"_postman_id": "c7a6e11b-9f34-4a25-a109-847291a82f34",
+		"name": "VigilX Crime Intelligence Platform - Complete 87 Endpoints Collection",
+		"description": "Exhaustive, 100% complete Postman collection containing all 87 API endpoints across Django REST Gateway (Port 8000) and FastAPI AI Engine (Port 8001).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "aiUrl",
+			"value": "http://127.0.0.1:8001",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication (Django)",
+			"item": [
+				{
+					"name": "Login (Officer User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"officer1\",\n  \"password\": \"Officer123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/logout/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Core CRUD & Case Gateway (Django)",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Cases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Case by FIR ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/?fir_id=101",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								""
+							],
+							"query": [
+								{
+									"key": "fir_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Cases (Fuzzy Search)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/?search=ROBBERY",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "ROBBERY"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Virtual Case Folder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/folder/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"folder",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bulk FIR Upload (CSV)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/bulk-upload/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"bulk-upload",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Victims",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/victims/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"victims",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Accused / Suspects",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accused/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"accused",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Accused by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/accused/?name=Rajesh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"accused",
+								""
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Rajesh"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Clue Entities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/entities/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Investigation Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/investigations/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"investigations",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get System Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/audit/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"audit",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auto-Suggest Search",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/suggest/?q=rob",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"suggest",
+								""
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "rob"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Entity Resolution (Duplicates)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/entity-resolution/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"entity-resolution",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Phase 4 & 5: Big Data & Demographics (Django)",
+			"item": [
+				{
+					"name": "Spatio-Temporal Trends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/trends/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"trends",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Seasonal Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/seasonal/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"seasonal",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Modus Operandi Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/mo/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"mo",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Comparative Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/compare/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"compare",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Anomaly Detection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/anomalies/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"anomalies",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GIS Mapping Coordinates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/gis/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"gis",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pattern Mining",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/patterns/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"patterns",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Demographic Breakdown",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/demographics/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"demographics",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Socioeconomic Correlation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/socioeconomic/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"socioeconomic",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Population Density Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/population-density/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"population-density",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Migration & Mobility",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/mobility/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"mobility",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Environmental Risk Factors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/risk-factors/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"risk-factors",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Public Safety Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/safety-index/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"safety-index",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Interactive Socio Reports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/analytics/socio-reports/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"analytics",
+								"socio-reports",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Phase 5: Suspect Profiling (Django)",
+			"item": [
+				{
+					"name": "Repeat Offenders History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/repeat-offenders/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"repeat-offenders",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Behavioral Pattern Clusters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/behavioral-clusters/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"behavioral-clusters",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Risk Score (Suspect 101)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/risk-score/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"risk-score",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Predictive Recidivism",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/recidivism/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"recidivism",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criminological Theory Mapping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/theory/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"theory",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Historical Pattern References",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/historical-matches/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"historical-matches",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "MO Tracking Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/mo-tracking/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"mo-tracking",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Network Profiling",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/network/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"network",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Demographic Profiling",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/profiling/demographics/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"profiling",
+								"demographics",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Phase 6: Decision Support (Django)",
+			"item": [
+				{
+					"name": "Case AI Summary",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/ai-summary/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"ai-summary",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Case Investigation Timeline",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/timeline/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"timeline",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mathematically Similar Cases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/similar/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"similar",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recommended Investigation Leads",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/leads/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"leads",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forensic Integration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/forensics/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"forensics",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Evidence Gaps Analysis",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/evidence-gaps/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"evidence-gaps",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Automated Dispatch Alerts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/alerts/dispatch/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"alerts",
+								"dispatch",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Supervisor Performance Analytics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/supervisor/analytics/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"supervisor",
+								"analytics",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Phase 8: Financial Crime & AML (Django)",
+			"item": [
+				{
+					"name": "Transaction Network Mapping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/network/ACC-1001/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"network",
+								"ACC-1001",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Suspicious Transactions Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/suspicious/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"suspicious",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Financial Entity Link",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/entity-link/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"entity-link",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AML Workflow Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/aml/report/TXN-5001/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"aml",
+								"report",
+								"TXN-5001",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cross-Border Tracing",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/cross-border/ACC-1001/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"cross-border",
+								"ACC-1001",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Financial Case Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/report/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"report",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fraud Pattern Matching",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/finance/fraud-patterns/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"finance",
+								"fraud-patterns",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Phase 9: All 8 Forecasting Endpoints (Django)",
+			"item": [
+				{
+					"name": "1. Hotspot Prediction Modeling",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/hotspots/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"hotspots",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Gang Activity Early Warnings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/gang-alerts/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"gang-alerts",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Trend Extrapolation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/trends/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"trends",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Strategic Early Warnings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/warnings/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"warnings",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Predictive Staffing Allocation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/staffing/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"staffing",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Model Retraining Trigger",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/retrain/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"retrain",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Event-Driven Forecasting",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/events/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"events",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. Re-Offender Parolee Warnings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/forecasting/re-offender-alerts/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"forecasting",
+								"re-offender-alerts",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Phase 10: XAI & Court Reports (Django)",
+			"item": [
+				{
+					"name": "Generate Court PDF Dossier",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/cases/101/report/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"cases",
+								"101",
+								"report",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reasoning Visualization",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/xai/reasoning/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"xai",
+								"reasoning",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Model Transparency & Bias Metrics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/xai/transparency/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"xai",
+								"transparency",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Explainable Risk Factors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/xai/explain-risk/101/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"xai",
+								"explain-risk",
+								"101",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ethical Guardrails Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/xai/guardrails/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"xai",
+								"guardrails",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. All 22 FastAPI AI Engine Endpoints (Port 8001)",
+			"item": [
+				{
+					"name": "1. Ask AI - Agentic Search",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"question\": \"Who is the suspect in case FIR-2026-101?\",\n  \"session_id\": \"session-postman-test\",\n  \"user_id\": \"officer1\"\n}"
+						},
+						"url": {
+							"raw": "{{aiUrl}}/ai/ask",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"ask"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Get Chat History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/history/officer1/session-postman-test",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"history",
+								"officer1",
+								"session-postman-test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Clear Chat History",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/history/officer1/session-postman-test",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"history",
+								"officer1",
+								"session-postman-test"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Export History as PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/history/officer1/session-postman-test/export.pdf",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"history",
+								"officer1",
+								"session-postman-test",
+								"export.pdf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Submit AI Feedback",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"session-postman-test\",\n  \"feedback\": \"positive\",\n  \"comments\": \"Great investigation lead!\"\n}"
+						},
+						"url": {
+							"raw": "{{aiUrl}}/ai/feedback",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"feedback"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Upload Document (OCR)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/documents/upload",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"documents",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Document Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/documents/status/doc-101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"documents",
+								"status",
+								"doc-101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. Get Processed Document",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/documents/doc-101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"documents",
+								"doc-101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "9. Process Document Batch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/documents/process-batch",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"documents",
+								"process-batch"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "10. Graph Visualize",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/visualize?fir_id=101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"visualize"
+							],
+							"query": [
+								{
+									"key": "fir_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "11. Graph Community Ranks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/community",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"community"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "12. Graph Centrality Hubs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/centrality",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"centrality"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "13. Graph Shortest Path",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/shortest-path?source_id=101&target_id=102",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"shortest-path"
+							],
+							"query": [
+								{
+									"key": "source_id",
+									"value": "101"
+								},
+								{
+									"key": "target_id",
+									"value": "102"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "14. Graph Geographic Mapping",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/geography",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"geography"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "15. Graph Temporal Evolution",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/temporal?year=2026",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"temporal"
+							],
+							"query": [
+								{
+									"key": "year",
+									"value": "2026"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "16. Graph Hidden Link Discovery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/hidden-links?suspect_id=101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"hidden-links"
+							],
+							"query": [
+								{
+									"key": "suspect_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "17. Graph Cypher Query",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/query?cypher=MATCH+(n)+RETURN+n+LIMIT+5",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"query"
+							],
+							"query": [
+								{
+									"key": "cypher",
+									"value": "MATCH+(n)+RETURN+n+LIMIT+5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "18. Graph Subgraph Export",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/graph/export?fir_id=101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"graph",
+								"export"
+							],
+							"query": [
+								{
+									"key": "fir_id",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "19. Offender Story Narrative",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/profiling/story/101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"profiling",
+								"story",
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "20. Offender Psych Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/profiling/psych-profile/101",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"profiling",
+								"psych-profile",
+								"101"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "21. Voice Transcription (STT)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/transcribe",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"transcribe"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "22. Text-to-Speech (TTS)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{aiUrl}}/ai/speak?text=VigilX+Intelligence+Ready",
+							"host": [
+								"{{aiUrl}}"
+							],
+							"path": [
+								"ai",
+								"speak"
+							],
+							"query": [
+								{
+									"key": "text",
+									"value": "VigilX+Intelligence+Ready"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
+>>>>>>> Stashed changes

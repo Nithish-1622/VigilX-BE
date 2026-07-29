@@ -1,20 +1,17 @@
 from rest_framework import viewsets, mixins
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from apps.audit.models import AuditLog
 from api.serializers.audit import AuditLogSerializer
+from api.permissions.rbac import IsSupervisor
 
 class AuditLogViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """
     ViewSet to list and retrieve system audit logs, and allow AI engine to log queries.
-    Access is restricted for reading, but creation is allowed.
+    Access is restricted to Supervisors for reading, but Authenticated users can create.
     """
     queryset = AuditLog.objects.all().order_by('-timestamp')
     serializer_class = AuditLogSerializer
-
-    def get_permissions(self):
-        if self.action == 'create':
-            return [AllowAny()]
-        return [IsAuthenticated()]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         queryset = super().get_queryset()

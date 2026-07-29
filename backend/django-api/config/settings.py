@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    # "corsheaders.middleware.CorsMiddleware",  # Managed centrally by FastAPI CORSMiddleware
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -82,14 +82,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Database Configuration (Falls back to SQLite if PostgreSQL variables are not defined)
+# Database Configuration (Falls back to SQLite if USE_LOCAL_DB is True or PostgreSQL variables are not defined)
+USE_LOCAL_DB = os.getenv("USE_LOCAL_DB", "False").lower() == "true"
 DB_NAME = os.getenv("DB_NAME") or os.getenv("POSTGRES_DB")
 DB_USER = os.getenv("DB_USER") or os.getenv("POSTGRES_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD") or os.getenv("POSTGRES_PASSWORD")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
-if DB_NAME and DB_USER and DB_PASSWORD:
+if not USE_LOCAL_DB and DB_NAME and DB_USER and DB_PASSWORD:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -100,6 +101,7 @@ if DB_NAME and DB_USER and DB_PASSWORD:
             "PORT": DB_PORT,
             "OPTIONS": {
                 "sslmode": "require",
+                "connect_timeout": 5,
             }
         }
     }
