@@ -39,9 +39,9 @@ class GraphIntelligenceAgent:
             citations = [
                 Citation(
                     source="neo4j_graph",
-                    snippet=str(r)[:200] if not isinstance(r, dict) else self._rec_snippet(r),
+                    snippet=str(r)[:250] if not isinstance(r, dict) else self._rec_snippet(r),
                 )
-                for r in records[:5]
+                for r in records[:20]
             ]
 
             return ToolResult(
@@ -88,18 +88,18 @@ class GraphIntelligenceAgent:
                 params.get("target_id", ""),
             )
         # Default: network overview for the given FIR or top-level graph
-        return self._network_overview(driver, params.get("fir_id"))
+        return self._network_overview(driver, params.get("fir_id"), state.get("question", ""))
 
-    def _network_overview(self, driver, fir_id: str | None) -> tuple[list[dict], str]:
+    def _network_overview(self, driver, fir_id: str | None, question: str = "") -> tuple[list[dict], str]:
         with driver.session() as session:
             if fir_id:
                 result = session.run(
-                    "MATCH (c:Case {id: $fir_id})-[r]-(n) RETURN type(r) AS rel, labels(n) AS node_type, n LIMIT 40",
+                    "MATCH (c:Case {id: $fir_id})-[r]-(n) RETURN type(r) AS rel, labels(n) AS node_type, properties(n) AS node_props LIMIT 40",
                     fir_id=fir_id,
                 )
             else:
                 result = session.run(
-                    "MATCH (n)-[r]->(m) RETURN labels(n) AS src_type, type(r) AS rel, labels(m) AS tgt_type LIMIT 40"
+                    "MATCH (n)-[r]->(m) RETURN labels(n) AS src_type, type(r) AS rel, labels(m) AS tgt_type, coalesce(n.name, n.id, 'N/A') AS src_name, coalesce(m.name, m.id, 'N/A') AS tgt_name LIMIT 40"
                 )
             records = [dict(r) for r in result]
         text = f"Graph overview: {len(records)} entity relationships found"

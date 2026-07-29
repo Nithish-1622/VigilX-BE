@@ -10,12 +10,12 @@ class EvidenceService:
     def records_to_text(self, rows: list[dict]) -> str:
         if not rows:
             return ""
-        limited = rows[:5]
+        limited = rows[:25]
         return "\n".join(self._row_to_line(row) for row in limited)
 
     def records_to_citations(self, rows: list[dict]) -> list[Citation]:
         citations: list[Citation] = []
-        for row in rows[:5]:
+        for row in rows[:25]:
             ref_id = row.get("id") if isinstance(row, dict) else None
             citations.append(
                 Citation(
