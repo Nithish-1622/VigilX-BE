@@ -8,6 +8,7 @@ from services.evidence_service import EvidenceService
 from services.rest_gateway import DjangoRestGateway
 from utils.config import settings
 
+_embedding_model = None
 
 @dataclass
 class RetrievedContext:
@@ -58,15 +59,23 @@ class RAGRetriever:
             qdrant_api_key = os.environ.get("QDRANT_API_KEY")
             
             if qdrant_url and qdrant_api_key:
-                client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
-                embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-                embeddings = list(embedding_model.embed([question]))
+                if os.getenv("X_ZOHO_CATALYST_LISTEN_PORT"):
+                    raise Exception("Skipping fastembed on Catalyst AppSail to prevent OOM crash")
+                    
+                def run_qdrant_search():
+                    global _embedding_model
+                    if _embedding_model is None:
+                        _embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+                    
+                    client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
+                    embeddings = list(_embedding_model.embed([question]))
+                    return client.search(
+                        collection_name="crime_cases",
+                        query_vector=embeddings[0].tolist(),
+                        limit=3
+                    )
                 
-                search_result = client.search(
-                    collection_name="crime_cases",
-                    query_vector=embeddings[0].tolist(),
-                    limit=3
-                )
+                search_result = await asyncio.to_thread(run_qdrant_search)
                 for point in search_result:
                     items.append({
                         "source": "qdrant_vector_search",

@@ -19,6 +19,9 @@ COPY requirements.txt /app/
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Pre-download the heavy 133MB fastembed model so it doesn't timeout AppSail at runtime
+RUN python -c "from fastembed import TextEmbedding; TextEmbedding(model_name='BAAI/bge-small-en-v1.5')"
+
 # Copy the entire project
 COPY . /app/
 
