@@ -15,17 +15,18 @@ from v2.state import V2WorkflowState
 SOURCE_RELIABILITY: dict[str, float] = {
     # Primary tier (0.85–1.0)
     "django_api": 0.96,
+    "sql": 0.96,
     "case_search": 0.95,
-    "accused_records": 0.92,
-    "victim_records": 0.91,
-    "case_summary": 0.87,
-    "crime_records": 0.85,
-    "investigation_status": 0.85,
+    "accused_records": 0.95,
+    "victim_records": 0.95,
+    "case_summary": 0.90,
+    "crime_records": 0.90,
+    "investigation_status": 0.90,
     # Secondary tier (0.60–0.84)
     "neo4j_graph": 0.80,
-    "qdrant_vector_search": 0.72,
-    "analytics_engine": 0.66,
-    "python_computation": 0.62,
+    "qdrant_vector_search": 0.75,
+    "analytics_engine": 0.70,
+    "python_computation": 0.65,
     # Tertiary tier (0.30–0.59)
     "visualization_engine": 0.45,
     "forecast_engine": 0.40,
@@ -65,8 +66,8 @@ class EvidenceRankingAgent(BaseAgent):
         citations = aggregated.all_citations
         ranked_items = self._rank(citations, question)
 
-        # Top-8 evidence items form the LLM prompt block
-        top_k = ranked_items[:8]
+        # Top-25 evidence items form the LLM prompt block
+        top_k = ranked_items[:25]
         top_evidence_text = self._format_top(top_k)
 
         overall_confidence = self._overall_confidence(ranked_items)

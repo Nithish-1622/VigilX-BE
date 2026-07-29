@@ -188,24 +188,28 @@ class ResponseComposerAgent(BaseAgent):
     ) -> list[KeyFinding]:
         if not reasoning:
             return []
-        paragraphs = [p.strip() for p in reasoning.split("\n") if len(p.strip()) > 30]
+        raw_lines = [p.strip() for p in reasoning.split("\n") if p.strip()]
         conf = bundle.overall_confidence if bundle else 0.0
         evidence_ids = [
             item.citation.reference_id
-            for item in (bundle.ranked_items[:3] if bundle else [])
+            for item in (bundle.ranked_items[:5] if bundle else [])
             if item.citation.reference_id
         ]
         findings: list[KeyFinding] = []
-        for para in paragraphs[:6]:
-            findings.append(
-                KeyFinding(
-                    finding=para,
-                    evidence_ids=evidence_ids,
-                    confidence=conf,
-                    supported=len(critic_warnings) == 0,
+        for line in raw_lines:
+            if line.startswith("###") or line.startswith("#") or line.startswith("---") or line.startswith("===") or line.startswith("━"):
+                continue
+            clean_text = line.lstrip("-*•1234567890. ").strip()
+            if len(clean_text) > 15:
+                findings.append(
+                    KeyFinding(
+                        finding=clean_text,
+                        evidence_ids=evidence_ids,
+                        confidence=conf,
+                        supported=len(critic_warnings) == 0,
+                    )
                 )
-            )
-        return findings
+        return findings[:12]
 
     def _collect_citations(self, bundle) -> list[Citation]:
         if not bundle:
