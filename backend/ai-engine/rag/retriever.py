@@ -67,7 +67,7 @@ class RAGRetriever:
                     if _embedding_model is None:
                         _embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
                     
-                    client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
+                    client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key, timeout=3.0)
                     embeddings = list(_embedding_model.embed([question]))
                     return client.search(
                         collection_name="crime_cases",
