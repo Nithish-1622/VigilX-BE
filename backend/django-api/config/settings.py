@@ -50,7 +50,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    # "corsheaders.middleware.CorsMiddleware",  # Managed centrally by FastAPI CORSMiddleware
+    # Only use Django CORS middleware locally; in production Catalyst API Gateway handles it.
+    *([ "corsheaders.middleware.CorsMiddleware" ] if os.getenv("ENVIRONMENT") != "production" and not os.getenv("X_ZOHO_CATALYST_LISTEN_PORT") else []),
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
