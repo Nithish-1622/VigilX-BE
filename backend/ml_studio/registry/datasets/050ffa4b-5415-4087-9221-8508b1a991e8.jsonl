@@ -1,0 +1,10 @@
+{"prompt":"What is VigilX?","completion":"VigilX is an AI-powered security platform."}
+{"prompt":"Who developed VigilX?","completion":"The VigilX development team."}
+{"prompt":"What is ML Studio?","completion":"ML Studio performs secure runtime fine tuning."}
+{"prompt":"What is LoRA?","completion":"LoRA is a parameter-efficient fine-tuning method."}
+{"prompt":"What is Ollama?","completion":"Ollama runs LLMs locally."}
+{"prompt":"What is PII?","completion":"Personally Identifiable Information."}
+{"prompt":"Why use local models?","completion":"To keep sensitive data private."}
+{"prompt":"What is a dataset?","completion":"A collection of training examples."}
+{"prompt":"What is fine tuning?","completion":"Adapting a pretrained model to a specific task."}
+{"prompt":"What is BLEU?","completion":"A metric for evaluating generated text."}

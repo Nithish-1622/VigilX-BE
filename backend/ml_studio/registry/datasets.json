@@ -1,0 +1,42 @@
+{
+  "00677bca-be7b-4475-902a-56f869c8d829": {
+    "dataset_id": "00677bca-be7b-4475-902a-56f869c8d829",
+    "tenant_id": "default",
+    "filename": "sample.jsonl",
+    "format": "jsonl",
+    "row_count": 3,
+    "file_size_bytes": 261,
+    "uploaded_at": "2026-07-29T19:32:08.822760",
+    "file_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\datasets\\00677bca-be7b-4475-902a-56f869c8d829.jsonl"
+  },
+  "050ffa4b-5415-4087-9221-8508b1a991e8": {
+    "dataset_id": "050ffa4b-5415-4087-9221-8508b1a991e8",
+    "tenant_id": "default",
+    "filename": "sample.jsonl",
+    "format": "jsonl",
+    "row_count": 10,
+    "file_size_bytes": 851,
+    "uploaded_at": "2026-07-29T19:57:02.428955",
+    "file_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\datasets\\050ffa4b-5415-4087-9221-8508b1a991e8.jsonl"
+  },
+  "998ef133-1090-4e52-a6df-3dc82366bd41": {
+    "dataset_id": "998ef133-1090-4e52-a6df-3dc82366bd41",
+    "tenant_id": "default",
+    "filename": "sample.jsonl",
+    "format": "jsonl",
+    "row_count": 10,
+    "file_size_bytes": 851,
+    "uploaded_at": "2026-07-30T03:29:33.743570",
+    "file_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\datasets\\998ef133-1090-4e52-a6df-3dc82366bd41.jsonl"
+  },
+  "be058ab3-4568-4dbb-adc8-9b3d4b9c8a1c": {
+    "dataset_id": "be058ab3-4568-4dbb-adc8-9b3d4b9c8a1c",
+    "tenant_id": "default",
+    "filename": "sample.jsonl",
+    "format": "jsonl",
+    "row_count": 10,
+    "file_size_bytes": 851,
+    "uploaded_at": "2026-07-30T04:36:10.035006",
+    "file_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\datasets\\be058ab3-4568-4dbb-adc8-9b3d4b9c8a1c.jsonl"
+  }
+}
