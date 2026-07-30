@@ -1,0 +1,97 @@
+{
+  "summary": {
+    "job_id": "9c5f8c3c-437a-441a-a572-138e689423e8",
+    "tenant_id": "default",
+    "job_name": "VigilX Test Training",
+    "status": "completed",
+    "dataset_id": "050ffa4b-5415-4087-9221-8508b1a991e8",
+    "base_model": "llama3.1",
+    "training_strategy": "lora",
+    "progress": 100.0,
+    "current_step": 500,
+    "total_steps": 500,
+    "final_loss": 0.3675,
+    "created_at": "2026-07-29T19:59:08.174408",
+    "started_at": "2026-07-29T19:59:08.203715",
+    "completed_at": "2026-07-29T19:59:12.227086",
+    "approved_by": null,
+    "approved_at": null,
+    "model_id": "8cb3ed06-ba37-4452-a8c1-b31b5d6d2481",
+    "ollama_model_name": null
+  },
+  "pipeline_stage_results": {
+    "validating": {
+      "passed": true,
+      "filename": "sample.jsonl",
+      "format": "jsonl",
+      "row_count": 10,
+      "validated_at": "2026-07-29T19:59:08.253526"
+    },
+    "preprocessing": {
+      "cleaned_rows_count": 10,
+      "pii_detected_counts": {},
+      "token_stats": {
+        "avg_tokens": 13.0,
+        "max_tokens": 16,
+        "p95_tokens": 16,
+        "exceeds_max_len_count": 0
+      },
+      "detected_domain": "faq",
+      "domain_confidence": 1.0,
+      "recommended_prompt": "faq"
+    },
+    "training": {
+      "adapter_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\adapters\\9c5f8c3c-437a-441a-a572-138e689423e8\\adapter",
+      "metrics": {
+        "strategy": "lora",
+        "final_loss": 0.3675,
+        "total_steps": 500,
+        "duration_seconds": 3.79,
+        "lora_rank": 8,
+        "lora_alpha": 16
+      },
+      "completed_at": "2026-07-29T19:59:12.167325"
+    },
+    "evaluating": {
+      "rouge_1": 0.9875,
+      "rouge_l": 1.0,
+      "bleu_4": 0.9056,
+      "perplexity": 4.93,
+      "latency_ms": 85.0,
+      "tokens_per_sec": 529.41,
+      "passed_quality_gate": true
+    },
+    "benchmarking": {
+      "hallucination_rate": 0.0,
+      "safety_pass_rate": 1.0,
+      "prompt_injection_blocked": true,
+      "quality_gate_passed": true
+    },
+    "approval": {
+      "decision": "auto_approved",
+      "timestamp": "2026-07-29T19:59:12.212960"
+    },
+    "deploying": {
+      "model_id": "8cb3ed06-ba37-4452-a8c1-b31b5d6d2481",
+      "status": "completed_no_deploy"
+    }
+  },
+  "evaluation": {
+    "rouge_1": 0.9875,
+    "rouge_l": 1.0,
+    "bleu_4": 0.9056,
+    "perplexity": 4.93,
+    "latency_ms": 85.0,
+    "tokens_per_sec": 529.41,
+    "passed_quality_gate": true
+  },
+  "benchmark": {
+    "hallucination_rate": 0.0,
+    "safety_pass_rate": 1.0,
+    "prompt_injection_blocked": true,
+    "quality_gate_passed": true
+  },
+  "recommendations": [
+    "Dataset is small. Consider synthetic augmentation before retraining."
+  ]
+}
