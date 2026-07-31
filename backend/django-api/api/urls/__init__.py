@@ -8,6 +8,7 @@ from apps.audit.views import AuditLogViewSet
 from apps.authentication.views import LoginView, RefreshView, LogoutView, MeView, ProvidersView
 
 from apps.reports.views import CaseReportView
+from api.ai_views import AIAskV1View, AIAskV2View
 
 # Central REST Router for VigilX models
 router = DefaultRouter()
@@ -113,4 +114,8 @@ urlpatterns = [
 
     # Case Report Export (PDF Generation)
     path('cases/<int:pk>/report/', CaseReportView.as_view(), name='case_pdf_report'),
+
+    # AI Engine Direct Database Query Endpoints
+    path('ai/ask', AIAskV1View.as_view(), name='api_ai_ask'),
+    path('ai/v2/ask', AIAskV2View.as_view(), name='api_ai_v2_ask'),
 ]
