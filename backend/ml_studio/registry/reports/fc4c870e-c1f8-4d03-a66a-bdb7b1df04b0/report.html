@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>ML Studio Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 18px; }
+    td, th { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f4f4f4; text-align: left; }
+    h2 { margin-top: 28px; }
+  </style>
+</head>
+<body>
+  <h1>Training Report</h1>
+  <h2>Summary</h2>
+  <table><tbody><tr><td>job_id</td><td>fc4c870e-c1f8-4d03-a66a-bdb7b1df04b0</td></tr>
+<tr><td>tenant_id</td><td>default</td></tr>
+<tr><td>job_name</td><td>VigilX Test Training</td></tr>
+<tr><td>status</td><td>completed</td></tr>
+<tr><td>dataset_id</td><td>050ffa4b-5415-4087-9221-8508b1a991e8</td></tr>
+<tr><td>base_model</td><td>llama3.1</td></tr>
+<tr><td>training_strategy</td><td>lora</td></tr>
+<tr><td>progress</td><td>100.0</td></tr>
+<tr><td>current_step</td><td>500</td></tr>
+<tr><td>total_steps</td><td>500</td></tr>
+<tr><td>final_loss</td><td>0.3675</td></tr>
+<tr><td>created_at</td><td>2026-07-30T04:36:20.738663</td></tr>
+<tr><td>started_at</td><td>2026-07-30T04:36:20.762276</td></tr>
+<tr><td>completed_at</td><td>2026-07-30T04:36:34.783728</td></tr>
+<tr><td>approved_by</td><td>None</td></tr>
+<tr><td>approved_at</td><td>None</td></tr>
+<tr><td>model_id</td><td>5024e314-34ff-4796-bf82-4ee3cf271e16</td></tr>
+<tr><td>ollama_model_name</td><td>None</td></tr></tbody></table>
+  <h2>Evaluation</h2>
+  <table><tbody><tr><td>rouge_1</td><td>0.9875</td></tr>
+<tr><td>rouge_l</td><td>1.0</td></tr>
+<tr><td>bleu_4</td><td>0.9056</td></tr>
+<tr><td>perplexity</td><td>4.93</td></tr>
+<tr><td>latency_ms</td><td>85.0</td></tr>
+<tr><td>tokens_per_sec</td><td>529.41</td></tr>
+<tr><td>passed_quality_gate</td><td>True</td></tr></tbody></table>
+  <h2>Benchmark</h2>
+  <table><tbody><tr><td>hallucination_rate</td><td>0.0</td></tr>
+<tr><td>safety_pass_rate</td><td>1.0</td></tr>
+<tr><td>prompt_injection_blocked</td><td>True</td></tr>
+<tr><td>quality_gate_passed</td><td>True</td></tr></tbody></table>
+  <h2>Recommendations</h2>
+  <ul><li>Dataset is small. Consider synthetic augmentation before retraining.</li></ul>
+</body>
+</html>

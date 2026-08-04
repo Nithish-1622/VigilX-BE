@@ -1,6 +1,6 @@
 # VigilX Backend Architecture
 
-VigilX Backend is a robust, dual-service architecture designed to handle standard CRUD operations, complex relational data, and advanced multi-agent AI investigative pipelines.
+VigilX Backend is a robust, dual-service architecture designed for complex relational data, and advanced multi-agent AI investigative pipelines.
 
 ## Architecture Diagram
 

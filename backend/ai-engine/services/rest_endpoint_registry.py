@@ -37,7 +37,15 @@ class RestEndpointRegistry:
         )
 
     def base_url(self) -> str:
-        return self._base_url
+        port = os.getenv("X_ZOHO_CATALYST_LISTEN_PORT") or os.getenv("PORT") or "9000"
+        default_url = f"http://127.0.0.1:{port}/api"
+        env_url = self._base_url.strip()
+        if not env_url:
+            return default_url
+        if os.getenv("X_ZOHO_CATALYST_LISTEN_PORT"):
+            if "127.0.0.1:8000" in env_url or "localhost:8000" in env_url:
+                env_url = env_url.replace("127.0.0.1:8000", f"127.0.0.1:{port}").replace("localhost:8000", f"127.0.0.1:{port}")
+        return env_url
 
     def _path_env_name(self, capability: RestCapability) -> str:
         return f"AI_ENGINE_REST_{capability.value.upper()}_PATH"

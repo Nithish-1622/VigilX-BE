@@ -24,17 +24,13 @@ class SQLAgentPlanner:
         fir_match = re.search(r'\b(FIR(?:-[A-Z]{2})?-\d{4}-\d+|FIR-\d+)\b', question, re.IGNORECASE)
         if fir_match:
             filters["fir_id"] = fir_match.group(1).upper()
-            filters["fir"] = fir_match.group(1).upper()
-
-        # Look for name patterns (e.g. "is Rajesh Kumar")
-        name_match = re.search(r'\b(?:is|show|suspect|victim|for|of|about|on|name)\b\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)', question)
+            
+        # Look for name patterns safely: Match a capitalized First Last name
+        name_match = re.search(r'\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b', question)
         if name_match:
             name_val = name_match.group(1).strip()
-            # Avoid matching case, role or FIR words as name
-            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "burglary", "timeline", "detail", "suspect", "victim", "accused", "person"]):
-                filters["name"] = name_val
-
-        # Look for crime type patterns — only when NOT looking up a specific FIR
+            if not any(word in name_val.lower() for word in ["case", "fir", "robbery", "theft", "timeline", "detail", "suspect", "victim", "accused", "person"]):
+                filters["name"] = name_val        # Look for crime type patterns — only when NOT looking up a specific FIR
         if "fir_id" not in filters:
             for crime in ["ROBBERY", "THEFT", "BURGLARY", "BANK_ROBBERY", "MURDER",
                           "ASSAULT", "KIDNAPPING", "FRAUD", "CYBERCRIME", "DRUG_TRAFFICKING"]:
@@ -102,8 +98,13 @@ class SQLAgentPlanner:
         if "crime_type" in filters and filters["crime_type"].upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN"}:
             del filters["crime_type"]
             
-        # If we have extracted specific filters like name or fir_id, we shouldn't send the full question to the full-text search.
-        query_text = question if not ("name" in filters or "fir_id" in filters) else ""
+        # Populate query_text so full-text search parameter is passed when appropriate
+        if "fir_id" in filters:
+            query_text = ""
+        elif "name" in filters:
+            query_text = filters["name"]
+        else:
+            query_text = question
 
         return StructuredQuery(
             capability=capability,

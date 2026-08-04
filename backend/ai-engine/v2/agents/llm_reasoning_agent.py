@@ -40,7 +40,7 @@ class LLMReasoningAgent(BaseAgent):
         evidence_text = bundle.top_evidence_text if bundle else ""
 
         # Truncate evidence text to prevent HTTP 413 (Payload Too Large) from the LLM provider
-        MAX_EVIDENCE_CHARS = 10000
+        MAX_EVIDENCE_CHARS = 25000
         if len(evidence_text) > MAX_EVIDENCE_CHARS:
             evidence_text = evidence_text[:MAX_EVIDENCE_CHARS] + "\n... (evidence truncated due to size limits)"
 

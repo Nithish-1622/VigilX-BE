@@ -29,12 +29,15 @@ class SQLAgentService:
         if structured_query is None:
             return SQLAgentResult(plan="no_query", records=[])
 
-        response: RestInvocationResponse = self._rest_gateway.invoke(
+        import asyncio
+        response: RestInvocationResponse = await asyncio.to_thread(
+            self._rest_gateway.invoke,
             structured_query,
-            auth_header=auth_header,
-            context_headers=context_headers,
+            auth_header,
+            context_headers,
         )
         rows = []
-        if response.success:
-            rows = response.payload.get("items", []) if isinstance(response.payload, dict) else []
+        if response.success and isinstance(response.payload, dict):
+            # Django REST Framework pagination uses 'results', legacy/other might use 'items'
+            rows = response.payload.get("results", response.payload.get("items", []))
         return SQLAgentResult(plan=structured_query.model_dump_json(), records=rows)

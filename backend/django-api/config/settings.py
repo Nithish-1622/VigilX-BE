@@ -13,13 +13,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env if present (local dev only).
 # override=False ensures Catalyst-injected env vars are never overwritten in production.
-load_dotenv(BASE_DIR.parent.parent / '.env', override=True)
+load_dotenv(BASE_DIR.parent.parent / '.env', override=False)
 
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-default-secret-key-change-in-production")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 allowed_hosts_str = os.getenv("ALLOWED_HOSTS", "*,localhost,127.0.0.1,testserver")
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(",") if host.strip()]
+
+csrf_origins_str = os.getenv("CSRF_TRUSTED_ORIGINS", "https://vigilx.onslate.in,https://vigilx.development.catalystappsail.in,http://localhost:5173,http://127.0.0.1:5173")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(",") if origin.strip()]
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,7 +50,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
+    # Only use Django CORS middleware locally; in production Catalyst API Gateway handles it.
+    *([ "corsheaders.middleware.CorsMiddleware" ] if os.getenv("ENVIRONMENT") != "production" and not os.getenv("X_ZOHO_CATALYST_LISTEN_PORT") else []),
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

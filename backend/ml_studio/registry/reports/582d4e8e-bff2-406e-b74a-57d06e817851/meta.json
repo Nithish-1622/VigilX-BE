@@ -1,0 +1,11 @@
+{
+  "job_id": "582d4e8e-bff2-406e-b74a-57d06e817851",
+  "generated_at": "2026-07-29T19:03:06.972595Z",
+  "json_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\reports\\582d4e8e-bff2-406e-b74a-57d06e817851\\report.json",
+  "html_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\reports\\582d4e8e-bff2-406e-b74a-57d06e817851\\report.html",
+  "pdf_path": "E:\\viglix\\VigilX-BE\\backend\\ml_studio\\registry\\reports\\582d4e8e-bff2-406e-b74a-57d06e817851\\report.pdf",
+  "html_ok": true,
+  "html_error": null,
+  "pdf_ok": false,
+  "pdf_error": "No module named 'weasyprint'"
+}

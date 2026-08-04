@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from schemas.rest import RestCapability
 from services.evidence_service import EvidenceService
 from services.sql_agent_service import SQLAgentService
 from services.sql_query_planner import SQLAgentPlanner
@@ -48,25 +49,73 @@ class SQLToolAgent:
                         val = str(v).strip()
                         if k in {"search", "query"}:
                             continue
-                        if k == "crime_type" and val.upper() in {"SUSPECT", "VICTIM", "ACCUSED", "UNKNOWN", "PERSONAL", "PERSONAL_DATA", "AGE"}:
+                        if k == "crime_type" and val.upper() not in {"ROBBERY", "THEFT", "BURGLARY", "BANK_ROBBERY", "MURDER", "ASSAULT", "KIDNAPPING", "FRAUD", "CYBERCRIME", "DRUG_TRAFFICKING"}:
                             continue
                         structured_query.filters[k] = val
 
-            # Execute via V1 SQLAgentService → DjangoRestGateway
+            # Execute primary query via V1 SQLAgentService → DjangoRestGateway
             result = await self._sql_agent.execute_plan(
                 structured_query,
                 auth_header=auth_header,
                 context_headers=context_headers,
             )
 
-            text = self._evidence.records_to_text(result.records)
-            citations = self._evidence.records_to_citations(result.records)
+            all_records = list(result.records)
+
+            # Supplementary queries for person details (accused/victim records) if name filter present or suspect/victim query
+            name_val = structured_query.filters.get("name")
+            if name_val or intent in {"suspect_query", "victim_query"}:
+                for extra_cap in [RestCapability.ACCUSED_RECORDS, RestCapability.VICTIM_RECORDS]:
+                    try:
+                        supp_query = structured_query.model_copy(deep=True)
+                        supp_query.capability = extra_cap
+                        if name_val:
+                            supp_query.filters = {"name": name_val}
+                            supp_query.query_text = name_val
+                        supp_res = await self._sql_agent.execute_plan(
+                            supp_query,
+                            auth_header=auth_header,
+                            context_headers=context_headers,
+                        )
+                        if supp_res.records:
+                            all_records.extend(supp_res.records)
+                    except Exception:
+                        pass
+
+            # Fallback query if zero records returned: run broad case search with original question
+            if not all_records:
+                try:
+                    fallback_query = structured_query.model_copy(deep=True)
+                    fallback_query.capability = RestCapability.CASE_SEARCH
+                    fallback_query.filters = {}
+                    fallback_query.query_text = question
+                    fb_res = await self._sql_agent.execute_plan(
+                        fallback_query,
+                        auth_header=auth_header,
+                        context_headers=context_headers,
+                    )
+                    if fb_res.records:
+                        all_records.extend(fb_res.records)
+                except Exception:
+                    pass
+
+            # Deduplicate records by id / name
+            seen_keys: set[str] = set()
+            unique_records: list[dict] = []
+            for rec in all_records:
+                key = str(rec.get("id") or rec.get("fir_number") or rec.get("name") or str(rec))
+                if key not in seen_keys:
+                    seen_keys.add(key)
+                    unique_records.append(rec)
+
+            text = self._evidence.records_to_text(unique_records)
+            citations = self._evidence.records_to_citations(unique_records)
 
             return ToolResult(
                 tool=ToolType.SQL,
                 subtask_id=tool_call.subtask_id,
                 success=True,
-                records=result.records,
+                records=unique_records,
                 text=text,
                 citations=citations,
                 metadata={"plan": structured_query.model_dump_json()},

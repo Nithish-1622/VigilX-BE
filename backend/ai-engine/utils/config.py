@@ -8,7 +8,11 @@ from dotenv import load_dotenv
 # Load environment variables from .env if it exists (local dev only).
 # override=False ensures Catalyst-injected env vars (production) are never overwritten.
 _env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-load_dotenv(dotenv_path=_env_path, override=True)
+load_dotenv(dotenv_path=_env_path, override=False)
+
+port_env = os.getenv("X_ZOHO_CATALYST_LISTEN_PORT") or os.getenv("PORT")
+if port_env:
+    os.environ["AI_ENGINE_REST_BASE_URL"] = f"http://127.0.0.1:{port_env}/api"
 
 
 @dataclass(frozen=True)
