@@ -50,8 +50,8 @@ is_catalyst = bool(os.getenv("X_ZOHO_CATALYST_LISTEN_PORT")) or os.getenv("ENVIR
 if not is_catalyst:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[origin.strip().rstrip('/') for origin in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000").split(",") if origin.strip()],
-        allow_credentials=True,
+        allow_origins=["*"],
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
